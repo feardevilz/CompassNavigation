@@ -1,0 +1,66 @@
+name: CompassNavigation
+version: 1.5
+description: This plugin allows you to create a usable compass that teleports you to various locations.
+website: http://dev.bukkit.org/bukkit-mods/compass-navigation/
+main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
+authors: [Adzwoolly, xMRKIRO]
+commands:
+  compassnav:
+    description: Allows you to reload configuration and set up the plugin ingame.
+    aliases: cn
+    permission: compassnav.admin.help
+    usage: "Usage: /compassnav help"
+permissions:
+  compassnav.*:
+    description: Gives access to all CompassNavigation commands.
+    default: op
+    children:
+      compassnav.use: true
+      compassnav.admin: true
+  compassnav.use:
+    description: Allows usage of the compass
+    default: true
+    children:
+      compassnav.slot.1: true
+      compassnav.slot.2: true
+      compassnav.slot.3: true
+      compassnav.slot.4: true
+      compassnav.slot.5: true
+      compassnav.slot.6: true
+      compassnav.slot.7: true
+      compassnav.slot.8: true
+      compassnav.slot.9: true
+      compassnav.slot.10: true
+      compassnav.slot.11: true
+      compassnav.slot.12: true
+      compassnav.slot.13: true
+      compassnav.slot.14: true
+      compassnav.slot.15: true
+      compassnav.slot.16: true
+      compassnav.slot.17: true
+      compassnav.slot.18: true
+      compassnav.slot.19: true
+      compassnav.slot.20: true
+      compassnav.slot.21: true
+      compassnav.slot.22: true
+      compassnav.slot.23: true
+      compassnav.slot.24: true
+      compassnav.slot.25: true
+      compassnav.slot.26: true
+      compassnav.slot.27: true
+  compassnav.admin:
+    description: Allows usage of CompassNavigation admin commands.
+    default: op
+    children:
+      compassnav.admin.help: true
+      compassnav.admin.reload: true
+      compassnav.admin.setup: true
+  compassnav.admin.help:
+    description: Allows usage of /compassnav help.
+    default: op
+  compassnav.admin.reload:
+    description: Allows usage of /compassnav reload.
+    default: op
+  compassnav.admin.setup:
+    description: Allows usage of /compassnav setup.
+    default: op
