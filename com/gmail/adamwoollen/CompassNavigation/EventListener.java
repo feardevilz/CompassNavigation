@@ -1,6 +1,7 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -50,6 +51,8 @@ public class EventListener implements Listener{
 		    		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
 		    			player.sendMessage("§4You can't teleport from this world.");
 		    		} else {
+		    			List<String> Ls = new ArrayList<String>();
+		    			
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
 		    			
 		    			int[] row1 = {1,2,3,4,5,6,7,8,9};
