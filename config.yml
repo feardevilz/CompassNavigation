@@ -7,7 +7,7 @@
 #It's caps sensitive, so be careful!
 #Please use a whole number (not decimal) for Yaw and Pitch
 #Pitch: -90 = Sky, +90 = Floor
-#Name Can have colour codes.  The colourcode is '§' e.g.  '§6' for gold
+#Name Can have colour codes.  The colourcode is '&' e.g.  '&6' for gold
 #Use "§" for colours in descriptions. "null" will make no description.
 #Up to 6 rows are supported
 
@@ -17,7 +17,7 @@ Rows: 1
 1:
   Enabled: true
   Item: FIRE
-  Name: To §6fire land!
+  Name: To &6fire land!
   Desc: To the land of fire!
   World: world
   X: 70
@@ -61,7 +61,7 @@ Rows: 1
 5:
   Enabled: true
   Item: MOB_SPAWNER
-  Name: §8 To the caves of ~4Darkness
+  Name: &8 To the caves of &4Darkness
   Desc: null
   World: world
   X: 63
