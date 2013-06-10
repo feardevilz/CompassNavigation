@@ -66,25 +66,25 @@ public class EventListener implements Listener{
 		    				this.handleRow(player, slot, chest);
 		    			}
 		    			
-		    			if (plugin.getConfig().getInt("Rows") == 2) {
+		    			if (plugin.getConfig().getInt("Rows") >= 2) {
 		    				for (int slot : row2) {
 		    					this.handleRow(player, slot, chest);
 		    				}
 		    			}
 		    			
-		    			if (plugin.getConfig().getInt("Rows") == 3) {	
+		    			if (plugin.getConfig().getInt("Rows") >= 3) {	
 		    				for (int slot : row3) {
 		    					this.handleRow(player, slot, chest);
 		    				}
 		    			}
 		    			
-		    			if (plugin.getConfig().getInt("Rows") == 4) {	
+		    			if (plugin.getConfig().getInt("Rows") >= 4) {	
 		    				for (int slot : row4) {
 		    					this.handleRow(player, slot, chest);
 		    				}
 		    			}
 		    			
-		    			if (plugin.getConfig().getInt("Rows") == 5) {	
+		    			if (plugin.getConfig().getInt("Rows") >= 5) {	
 		    				for (int slot : row5) {
 		    					this.handleRow(player, slot, chest);
 		    				}
