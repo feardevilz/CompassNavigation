@@ -59,12 +59,12 @@ public final class CompassNavigation extends JavaPlugin {
     			    if (p.hasPermission("compassnav.admin.reload")) {
     				    if (args[0].equalsIgnoreCase("reload")) {
     					    this.reloadConfig();
-    						p.sendMessage(prefix + "§6Compass Navigation reloaded!");
+    						p.sendMessage(prefix + "§ 6Compass Navigation reloaded!");
     					} else {
     						if (p.hasPermission("compassnav.admin.setup")) {
     							if (args[0].equalsIgnoreCase("setup")) {
-    								p.sendMessage(prefix + "§6Please specify a slot number.");
-    								p.sendMessage(prefix + "§6Usage:   /CN setup <1>");
+    								p.sendMessage(prefix + " §6Please specify a slot number.");
+    								p.sendMessage(prefix + " §6Usage:   /CN setup <1>");
     							}
     						}
     					}
@@ -84,15 +84,15 @@ public final class CompassNavigation extends JavaPlugin {
     							if (Integer.parseInt(args[1]) <= 27) {
     								p.sendMessage("§2------------------------ §6CN setup §2-------------------------");
     								p.sendMessage("§2/CN setup desc <description>     <--- Sets item description");
-    								p.sendMessage(prefix + "§6You are now setting up slot " + args[1]);
-    								p.sendMessage(prefix + "§6/CN setup loc                    <--- Sets location");
-    								p.sendMessage(prefix + "§6/CN setup name <name>            <--- Sets item name");
-    								p.sendMessage(prefix + "§6/CN setup desc <description>     <--- Sets item description");
+    								p.sendMessage(prefix + " §6You are now setting up slot " + args[1]);
+    								p.sendMessage(prefix + " §6/CN setup loc                    <--- Sets location");
+    								p.sendMessage(prefix + " §6/CN setup name <name>            <--- Sets item name");
+    								p.sendMessage(prefix + " §6/CN setup desc <description>     <--- Sets item description");
     								p.sendMessage("§2---------------------------------------------------------------");
     								return true;
     							}
     						}
-    						p.sendMessage(prefix + "§6This is not a valid number");
+    						p.sendMessage(prefix + " §6This is not a valid number");
     					}
     				}
     			}
