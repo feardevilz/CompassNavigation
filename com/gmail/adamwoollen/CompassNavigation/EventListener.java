@@ -21,7 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class EventListener implements Listener{
   
     private CompassNavigation plugin;
-    public List<String> Ls;
+    public List<String> Ls = new ArrayList<String>();
     public Inventory chest;
     
     public EventListener(CompassNavigation p) {}
@@ -51,8 +51,6 @@ public class EventListener implements Listener{
 		    		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
 		    			player.sendMessage("§4You can't teleport from this world.");
 		    		} else {
-		    			List<String> Ls = new ArrayList<String>();
-		    			
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
 		    			
 		    			int[] row1 = {1,2,3,4,5,6,7,8,9};
