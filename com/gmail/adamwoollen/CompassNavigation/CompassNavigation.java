@@ -65,8 +65,8 @@ public final class CompassNavigation extends JavaPlugin {
     							if (args[0].equalsIgnoreCase("setup")) {
     								p.sendMessage(prefix + "§6Please specify a slot number.");
     								p.sendMessage(prefix + "§6Usage:   /CN setup <1>");
-    					}
-    					}
+    							}
+    						}
     					}
     				} else {
     					if (args[0].equalsIgnoreCase("reload")) {
@@ -74,8 +74,7 @@ public final class CompassNavigation extends JavaPlugin {
     						getLogger().info("Compass Navigation reloaded!");
     					}
     				}
-    				}
-    				}
+    			}
     		} else if (args.length == 2) {
     			if (sender instanceof Player) {
     				Player p = (Player) sender;
@@ -83,18 +82,22 @@ public final class CompassNavigation extends JavaPlugin {
     					if (args[0].equalsIgnoreCase("setup")) {
     						if (isInteger(args[1])) {
     							if (Integer.parseInt(args[1]) <= 27) {
-    								p.sendMessage(prefix + "§6You are now setting up slot one.");
+    								p.sendMessage("§2------------------------ §6CN setup §2-------------------------");
+    								p.sendMessage("§2/CN setup desc <description>     <--- Sets item description");
+    								p.sendMessage(prefix + "§6You are now setting up slot " + args[1]);
     								p.sendMessage(prefix + "§6/CN setup loc                    <--- Sets location");
     								p.sendMessage(prefix + "§6/CN setup name <name>            <--- Sets item name");
     								p.sendMessage(prefix + "§6/CN setup desc <description>     <--- Sets item description");
-    								}
-    						} else {
-    							p.sendMessage(prefix + "§6");
+    								p.sendMessage("§2---------------------------------------------------------------");
+    								return true;
+    							}
     						}
+    						p.sendMessage(prefix + "§6This is not a valid number");
     					}
     				}
     			}
     		}
+    	}
 		return true;
     }
 	
