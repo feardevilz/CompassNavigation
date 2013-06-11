@@ -128,15 +128,20 @@ public class EventListener implements Listener{
 											if (player.hasPermission("compassnav.slot." + slot)) {
 												if (sectionExists(slot, ".Bungee")) {
 													player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
-												} else{
-													Location location = player.getLocation();
-													location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
-													location.setX(plugin.getConfig().getDouble(slot + ".X"));
-													location.setY(plugin.getConfig().getDouble(slot + ".Y"));
-													location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
-													location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
-													location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
-													player.teleport(location);
+												} else {
+													if (sectionExists(slot, ".Warp")) {
+														Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"))
+														player.closeInventory();
+													} else {
+														Location location = player.getLocation();
+														location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
+														location.setX(plugin.getConfig().getDouble(slot + ".X"));
+														location.setY(plugin.getConfig().getDouble(slot + ".Y"));
+														location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
+														location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
+														location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
+														player.teleport(location);
+														player.closeInventory();
 												}
 											}
 										}
