@@ -39,8 +39,6 @@ public final class CompassNavigation extends JavaPlugin {
 	// check: It only starts the checking if you are holding the compass item.
 	// I have changed the "No permission" lore to a dark red one, instead of colorless.
 	
-	// TODO: Add essentials warp support
-	
 	public void onEnable() {
         this.saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
