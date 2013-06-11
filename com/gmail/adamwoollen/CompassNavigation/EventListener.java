@@ -27,13 +27,11 @@ public class EventListener implements Listener{
     	plugin = p;
     }
     
-    public boolean sectionExists(int slot, String section) {
-    	try {
-    		plugin.getConfig().getString(slot + section);
+    public boolean sectionExists(int slot, String path){
+    	if(plugin.getConfig().contains(slot + path)){
     		return true;
-    	} catch(Exception e) {
-    		return false;
     	}
+    	return false;
     }
 	
     public void handleRow(Player player, int slot, Inventory chest) {
