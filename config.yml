@@ -2,9 +2,8 @@
 # Each number represents the slot in the compass GUI.
 # If the slot is not in use, set Enabled to False!
 # Item is the item to represent the teleport in the Compass GUI.
-# USE THE WORDS FROM THE LINK FOR ITEMS!
-# http://jd.bukkit.org/dev/doxygen/d6/d0e/enumorg_1_1bukkit_1_1Material.html
-# It's caps sensitive, so be careful!
+# Use item IDs for specifying an item!
+# http://www.minecraftwiki.net/wiki/Data_values#Item_IDs
 # Please use a whole number (not decimal) for Yaw and Pitch
 # Pitch: -90 = Sky, +90 = Floor
 # The name can have colour codes.  The colourcode is '&', e.g. '&6' for gold
@@ -17,7 +16,7 @@ GUIName: CompassNavigation
 Rows: 1
 1:
   Enabled: true
-  Item: FIRE
+  Item: 51
   Name: To &6fire land!
   Desc: To the land of fire!
   World: world
