@@ -42,7 +42,7 @@ public class EventListener implements Listener{
     			Ls.clear();
     			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
 				if(plugin.getConfig().getString(slot + ".Desc") != "null") {
-					Ls.add(plugin.getConfig().getString(slot + ".Desc"));
+					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
 				}
 				if(player.hasPermission("compassnav.slot." + slot)) {
 					chest.setItem(slot - 1, setName(new ItemStack(plugin.getConfig().getInt(slot + ".Item"), 1), Name, Ls));
