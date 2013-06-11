@@ -94,9 +94,12 @@ public final class CompassNavigation extends JavaPlugin {
     							}
     						} else if(!slot.equals("0")){
     							if (args[1].equalsIgnoreCase("loc")) {
+    								this.getConfig().set(slot + ".World", p.getWorld().getName());
     								this.getConfig().set(slot + ".X", p.getLocation().getX());
     								this.getConfig().set(slot + ".Y", p.getLocation().getY());
     								this.getConfig().set(slot + ".Z", p.getLocation().getZ());
+    								this.getConfig().set(slot + ".Yaw", p.getLocation().getYaw());
+    								this.getConfig().set(slot + ".Yaw", p.getLocation().getPitch());
     								return true;
     							} else if (args[1].equalsIgnoreCase("name")) {
     								if(args[2] != null){
