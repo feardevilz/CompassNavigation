@@ -49,7 +49,7 @@ public final class CompassNavigation extends JavaPlugin {
 	}
 	
 	String prefix = "§a[§6CN§a]";
-	Integer slot = 0;
+	String slot = "0";
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
     	if(cmd.getName().equalsIgnoreCase("compassnav") || (cmd.getName().equalsIgnoreCase("cn"))) {
@@ -59,7 +59,7 @@ public final class CompassNavigation extends JavaPlugin {
     			    if (p.hasPermission("compassnav.admin.reload")) {
     				    if (args[0].equalsIgnoreCase("reload")) {
     					    this.reloadConfig();
-    						p.sendMessage(prefix + "§ 6Compass Navigation reloaded!");
+    						p.sendMessage(prefix + "§6Compass Navigation reloaded!");
     					} else {
     						if (p.hasPermission("compassnav.admin.setup")) {
     							if (args[0].equalsIgnoreCase("setup")) {
@@ -82,6 +82,7 @@ public final class CompassNavigation extends JavaPlugin {
     					if (args[0].equalsIgnoreCase("setup")) {
     						if (isInteger(args[1])) {
     							if (Integer.parseInt(args[1]) <= 27) {
+    								slot = args[1]
     								p.sendMessage("§2------------------------ §6CN setup §2-------------------------");
     								p.sendMessage("§2/CN setup desc <description>     <--- Sets item description");
     								p.sendMessage(prefix + " §6You are now setting up slot " + args[1]);
@@ -90,6 +91,33 @@ public final class CompassNavigation extends JavaPlugin {
     								p.sendMessage(prefix + " §6/CN setup desc <description>     <--- Sets item description");
     								p.sendMessage("§2---------------------------------------------------------------");
     								return true;
+    							}
+    						} else if(!slot.equals("0")){
+    							if (args[1].equalsIgnoreCase("loc")) {
+    								this.getConfig().set(slot + ".X", p.getLocation().getX());
+    								this.getConfig().set(slot + ".Y", p.getLocation().getY());
+    								this.getConfig().set(slot + ".Z", p.getLocation().getZ());
+    								return true;
+    							} else if (args[1].equalsIgnoreCase("name")) {
+    								if(args[2] != null){
+    									StringBuilder sb = new StringBuilder();
+										for (int i = 2; i < args.length; i++) {
+											sb.append(args[i]).append(" ");
+										}
+										String name = sb.toString().trim();
+	    								this.getConfig().set(slot + ".Name", name);
+	    								return true;
+    								}
+    							} else if (args[1].equalsIgnoreCase("desc")) {
+    								if(args[2] != null){
+    									StringBuilder sb = new StringBuilder();
+										for (int i = 2; i < args.length; i++) {
+											sb.append(args[i]).append(" ");
+										}
+										String desc = sb.toString().trim();
+	    								this.getConfig().set(slot + ".Desc", desc);
+	    								return true;
+    								}
     							}
     						}
     						p.sendMessage(prefix + " §6This is not a valid number");
