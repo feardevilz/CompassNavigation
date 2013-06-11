@@ -130,8 +130,11 @@ public class EventListener implements Listener{
 													player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
 												} else {
 													if (sectionExists(slot, ".Warp")) {
-														Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
-														player.closeInventory();
+															if (plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+																Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
+																player.closeInventory();
+															} else {
+																plugin.getServer().getLogger().severe("Essentials not found. Using coordinates from the configuration for slot " + slot);
 													} else {
 														Location location = player.getLocation();
 														location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
