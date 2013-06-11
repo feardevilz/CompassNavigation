@@ -82,7 +82,7 @@ public final class CompassNavigation extends JavaPlugin {
     					if (args[0].equalsIgnoreCase("setup")) {
     						if (isInteger(args[1])) {
     							if (Integer.parseInt(args[1]) <= 27) {
-    								slot = args[1]
+    								slot = args[1];
     								p.sendMessage("§2------------------------ §6CN setup §2-------------------------");
     								p.sendMessage("§2/CN setup desc <description>     <--- Sets item description");
     								p.sendMessage(prefix + " §6You are now setting up slot " + args[1]);
