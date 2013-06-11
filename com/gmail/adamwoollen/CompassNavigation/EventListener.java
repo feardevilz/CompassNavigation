@@ -130,7 +130,7 @@ public class EventListener implements Listener{
 													player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
 												} else {
 													if (sectionExists(slot, ".Warp")) {
-														Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"))
+														Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
 														player.closeInventory();
 													} else {
 														Location location = player.getLocation();
