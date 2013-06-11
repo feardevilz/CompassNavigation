@@ -22,6 +22,7 @@ public class EventListener implements Listener{
     private CompassNavigation plugin;
     public Inventory chest;
     public List<String> Ls = new ArrayList<String>();
+    public Boolean noBungee = false;
     
     public EventListener(CompassNavigation p) {
     	plugin = p;
@@ -50,6 +51,32 @@ public class EventListener implements Listener{
 				}
     		}
     	}
+    }
+    
+    public void checkWarp(Player player, int slot) {
+    	if (sectionExists(slot, ".Warp")) {
+    		if (plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+    			Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
+    			player.closeInventory();
+    		} else {
+    			plugin.getServer().getLogger().severe("Essentials not found. Using coordinates from the configuration for slot " + slot + ".");
+    			this.checkCoords(player, slot);
+    		}
+    	} else {
+    		this.checkCoords(player, slot);
+    	}
+    }
+    
+    public void checkCoords(Player player, int slot) {
+    	Location location = player.getLocation();
+		location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
+		location.setX(plugin.getConfig().getDouble(slot + ".X"));
+		location.setY(plugin.getConfig().getDouble(slot + ".Y"));
+		location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
+		location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
+		location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
+		player.teleport(location);
+		player.closeInventory();
     }
     
 	@EventHandler
@@ -127,25 +154,14 @@ public class EventListener implements Listener{
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if (player.hasPermission("compassnav.slot." + slot)) {
 												if (sectionExists(slot, ".Bungee")) {
-													player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
-												} else {
-													if (sectionExists(slot, ".Warp")) {
-															if (plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
-																Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
-																player.closeInventory();
-															} else {
-																plugin.getServer().getLogger().severe("Essentials not found. Using coordinates from the configuration for slot " + slot);
+													if (plugin.getServer().getPluginManager().isPluginEnabled("BungeeCord")) {
+														player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
 													} else {
-														Location location = player.getLocation();
-														location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
-														location.setX(plugin.getConfig().getDouble(slot + ".X"));
-														location.setY(plugin.getConfig().getDouble(slot + ".Y"));
-														location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
-														location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
-														location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
-														player.teleport(location);
-														player.closeInventory();
-												}
+														plugin.getServer().getLogger().severe("BungeeCord not found. Using coordinates or warp for slot" + slot + ".");
+														this.checkWarp(player, slot);
+													}
+												} else {
+													this.checkWarp(player, slot);
 											}
 										}
 									}
@@ -155,6 +171,7 @@ public class EventListener implements Listener{
 					}
 				}
 			e.setCancelled(true);
+				}
 			}
 		}
 	}
