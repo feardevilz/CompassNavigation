@@ -126,8 +126,8 @@ public class EventListener implements Listener{
 									if (this.sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if (player.hasPermission("compassnav.slot." + slot)) {
-												if (sectionExists(slot, ".Server")) {
-													player.chat("/server " + plugin.getConfig().getString(slot + ".Server"));
+												if (sectionExists(slot, ".Bungee")) {
+													player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
 												} else{
 													Location location = player.getLocation();
 													location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
