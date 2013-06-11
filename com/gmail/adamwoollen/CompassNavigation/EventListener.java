@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -46,10 +45,10 @@ public class EventListener implements Listener{
 					Ls.add(plugin.getConfig().getString(slot + ".Desc"));
 				}
 				if(player.hasPermission("compassnav.slot." + slot)) {
-					chest.setItem(slot - 1, setName(new ItemStack(Material.getMaterial(plugin.getConfig().getString(slot + ".Item")), 1), Name, Ls));
+					chest.setItem(slot - 1, setName(new ItemStack(plugin.getConfig().getInt(slot + ".Item"), 1), Name, Ls));
 				} else {
 					Ls.add("§4No permission");
-					chest.setItem(slot - 1, setName(new ItemStack(Material.getMaterial(36), 1), Name, Ls));
+					chest.setItem(slot - 1, setName(new ItemStack(36, 1), Name, Ls));
 				}
     		}
     	}
@@ -59,23 +58,23 @@ public class EventListener implements Listener{
 	public void onPlayerInteract(PlayerInteractEvent e){
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 		    Player player = e.getPlayer();
-		    if (player.getItemInHand().getType() == Material.getMaterial(plugin.getConfig().getString("Item"))) {
+		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
 		    	if (player.hasPermission("compassnav.use")) {
 		    		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
 		    			player.sendMessage("§4You can't teleport from this world.");
 		    		} else {
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
-		    			
+		    		
 		    			int[] row1 = {1,2,3,4,5,6,7,8,9};
-		    			int[] row2 = {10,11,12,13,14,15,16,17,18};
-		    			int[] row3 = {19,20,21,22,23,24,25,26,27};
-		    			int[] row4 = {28,29,30,31,32,33,34,35,36};
-		    			int[] row5 = {37,38,39,40,41,42,43,44,45};
-		    			int[] row6 = {46,47,48,49,50,51,52,53,54};
-		    			
-		    			for (int slot : row1) {
-		    				this.handleRow(player, slot, chest);
-		    			}
+			   			int[] row2 = {10,11,12,13,14,15,16,17,18};
+			   			int[] row3 = {19,20,21,22,23,24,25,26,27};
+			   			int[] row4 = {28,29,30,31,32,33,34,35,36};
+			   			int[] row5 = {37,38,39,40,41,42,43,44,45};
+			   			int[] row6 = {46,47,48,49,50,51,52,53,54};
+	    				
+			   			for (int slot : row1) {
+			   				this.handleRow(player, slot, chest);
+			   			}
 	    			
 		    			if (plugin.getConfig().getInt("Rows") >= 2) {	
 		    				for (int slot : row2) {
@@ -118,7 +117,7 @@ public class EventListener implements Listener{
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent e){
 		Player player = (Player) e.getWhoClicked();
-		if (player.getItemInHand().getType() == Material.getMaterial(plugin.getConfig().getString("Item"))) {
+		if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
 			if(e.getInventory().getTitle() == plugin.getConfig().getString("GUIName")) {
 				if(e.getSlotType() == SlotType.CONTAINER) {
 					if(e.isLeftClick()) {
