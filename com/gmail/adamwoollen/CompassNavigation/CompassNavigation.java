@@ -46,12 +46,12 @@ public final class CompassNavigation extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 	}
 	
-	String prefix = "§a[§6CN§a] ";
+	String prefix = "§a§l[§6§lCN§a§l] ";
 	String slot = "0";
 	Boolean item = false;
 	Boolean loc = false;
 	Boolean name = false;
-	Boolean bungee = false;
+	Boolean noloc = false;
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
     	if(cmd.getName().equalsIgnoreCase("compassnav") || (cmd.getName().equalsIgnoreCase("cn"))) {
@@ -119,7 +119,6 @@ public final class CompassNavigation extends JavaPlugin {
 									p.sendMessage(prefix + "§6/CN setup desc <description> <--- Sets item description");
 									p.sendMessage(prefix + "§6/CN setup enable                <--- Enables slot");
 									p.sendMessage("§2-----------------------------------------------------");
-									return true;
 								}
 							} else if(!slot.equals("0")){
 								if (args[1].equalsIgnoreCase("loc")) {
@@ -131,19 +130,16 @@ public final class CompassNavigation extends JavaPlugin {
 									this.getConfig().set(slot + ".Pitch", p.getLocation().getPitch());
 									p.sendMessage(prefix + "§6Location set for slot " + slot + "!");
 									loc = true;
-									return true;
 								} else if (args[1].equalsIgnoreCase("bungee")) {
 									this.getConfig().set(slot + ".Bungee", args[2]);
 									p.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
 									this.saveConfig();
-									bungee = true;
-									return true;
+									noloc = true;
 								} else if (args[1].equalsIgnoreCase("item")) {
 									this.getConfig().set(slot + ".Item", p.getItemInHand().getTypeId());
 									p.sendMessage(prefix + "§6Item set for slot " + slot + "!");
 									this.saveConfig();
 									item = true;
-									return true;
 								} else if (args[1].equalsIgnoreCase("name")) {
 									if(args[2] != null){
 										StringBuilder sb = new StringBuilder();
@@ -155,7 +151,6 @@ public final class CompassNavigation extends JavaPlugin {
 										p.sendMessage(prefix + "§6Name set for slot " + slot + "!");
 										this.saveConfig();
 										name = true;
-										return true;
 									}
 								} else if (args[1].equalsIgnoreCase("desc")) {
 									if(args[2] != null){
@@ -167,23 +162,34 @@ public final class CompassNavigation extends JavaPlugin {
 										this.getConfig().set(slot + ".Desc", desc);
 										p.sendMessage(prefix + "§6Description set for slot " + slot + "!");
 										this.saveConfig();
-										return true;
+									}
+								} else if (args[1].equalsIgnoreCase("warp")) {
+									if (args[2] != null) {
+										StringBuilder sb = new StringBuilder();
+										for (int i = 2; i < args.length; i++) {
+											sb.append(args[i]).append(" ");
+										}
+										String warp = sb.toString().trim();
+										this.getConfig().set(slot + ".Warp", warp);
+										p.sendMessage(prefix + "§6Warp set for slot " + slot + "!");
+										this.saveConfig();
+										noloc = true;
 									}
 								} else if (args[1].equalsIgnoreCase("enable")){
-									if(bungee = !true){
+									if(noloc = !true) {
 										if(item != true || loc != true || name != true){
 											p.sendMessage(prefix + "§6You have not set all of the required items");
 											if (item != true) {
 												p.sendMessage(prefix + "§6You have not specified an item!");
 											}
 											if (loc != true) {
-												p.sendMessage(prefix + "§6You have not specified a location or bungee!");
+												p.sendMessage(prefix + "§6You have not specified a location, bungee or warp!");
 											}
 											if (name != true) {
 												p.sendMessage(prefix + "§6You have not specified a name!");
 											}
-										return true;
-										} else{
+										;
+										} else {
 											this.getConfig().set(slot + ".Enabled", true);
 											this.saveConfig();
 											p.sendMessage(prefix + "§6Enabled slot " + slot);
@@ -191,9 +197,9 @@ public final class CompassNavigation extends JavaPlugin {
 											item = false;
 											loc = false;
 											name = false;
-											bungee = false;
+											noloc = false;
 										}
-									} else{
+									} else {
 										if(item != true || name != true){
 											p.sendMessage(prefix + "§6You have not set all of the required items");
 											if (item != true) {
@@ -202,7 +208,7 @@ public final class CompassNavigation extends JavaPlugin {
 											if (name != true) {
 												p.sendMessage(prefix + "§6You have not specified a name!");
 											}
-										} else{
+										} else {
 											this.getConfig().set(slot + ".Enabled", true);
 											this.saveConfig();
 											p.sendMessage(prefix + "§6Enabled slot " + slot);
@@ -210,10 +216,9 @@ public final class CompassNavigation extends JavaPlugin {
 											item = false;
 											loc = false;
 											name = false;
-											bungee = false;
+											noloc = false;
 										}
 									}
-									return true;
 								}
 							}
 						}
@@ -233,6 +238,6 @@ public final class CompassNavigation extends JavaPlugin {
 	    } catch(NumberFormatException e) {
 	        return false;
 	    }
-	    return true;
+		return true;
 	}
 }
