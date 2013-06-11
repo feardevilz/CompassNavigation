@@ -51,6 +51,7 @@ public final class CompassNavigation extends JavaPlugin {
 	Boolean item = false;
 	Boolean loc = false;
 	Boolean name = false;
+	Boolean bungee = false;
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
     	if(cmd.getName().equalsIgnoreCase("compassnav") || (cmd.getName().equalsIgnoreCase("cn"))) {
@@ -95,10 +96,10 @@ public final class CompassNavigation extends JavaPlugin {
 						this.reloadConfig();
 						getLogger().info("[CN] Compass Navigation reloaded!");
 					} else if (args[0].equalsIgnoreCase("help")){
-						getLogger().info("-------------------- CN Help ---------------");
+						getLogger().info("----------------- CN Help -------------");
 						getLogger().info("/CN help           <--- Displays this text");
 						getLogger().info("/CN reload         <--- Reload from config");
-						getLogger().info("-----------------------------------------------");
+						getLogger().info("------------------------------------------");
 					}
 				}
 			} else if (args.length >= 2) {
@@ -112,9 +113,11 @@ public final class CompassNavigation extends JavaPlugin {
 									p.sendMessage("§2------------------------ §6CN setup §2--------------------");
 									p.sendMessage(prefix + "§6You are now setting up slot " + args[1]);
 									p.sendMessage(prefix + "§6/CN setup loc                     <--- Sets location");
+									p.sendMessage(prefix + "§6/CN setup bungee <server>   <--- Sets server (bungee)");
 									p.sendMessage(prefix + "§6/CN setup item                    <--- Sets item = in hand");
 									p.sendMessage(prefix + "§6/CN setup name <name>         <--- Sets item name");
 									p.sendMessage(prefix + "§6/CN setup desc <description> <--- Sets item description");
+									p.sendMessage(prefix + "§6/CN setup enable                <--- Enables slot");
 									p.sendMessage("§2-----------------------------------------------------");
 									return true;
 								}
@@ -128,6 +131,12 @@ public final class CompassNavigation extends JavaPlugin {
 									this.getConfig().set(slot + ".Pitch", p.getLocation().getPitch());
 									p.sendMessage(prefix + "§6Location set for slot " + slot + "!");
 									loc = true;
+									return true;
+								} else if (args[1].equalsIgnoreCase("bungee")) {
+									this.getConfig().set(slot + ".Bungee", args[2]);
+									p.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
+									this.saveConfig();
+									bungee = true;
 									return true;
 								} else if (args[1].equalsIgnoreCase("item")) {
 									this.getConfig().set(slot + ".Item", p.getItemInHand().getTypeId());
@@ -161,26 +170,48 @@ public final class CompassNavigation extends JavaPlugin {
 										return true;
 									}
 								} else if (args[1].equalsIgnoreCase("enable")){
-									if(item != true || loc != true || name != true){
-										p.sendMessage(prefix + "§6You have not set all of the required items");
-										if (item != true) {
-											p.sendMessage(prefix + "§6You have not specified an item!");
+									if(bungee = !true){
+										if(item != true || loc != true || name != true){
+											p.sendMessage(prefix + "§6You have not set all of the required items");
+											if (item != true) {
+												p.sendMessage(prefix + "§6You have not specified an item!");
+											}
+											if (loc != true) {
+												p.sendMessage(prefix + "§6You have not specified a location or bungee!");
+											}
+											if (name != true) {
+												p.sendMessage(prefix + "§6You have not specified a name!");
+											}
+										return true;
+										} else{
+											this.getConfig().set(slot + ".Enabled", true);
+											this.saveConfig();
+											p.sendMessage(prefix + "§6Enabled slot " + slot);
+											slot = "0";
+											item = false;
+											loc = false;
+											name = false;
+											bungee = false;
 										}
-										if (loc != true) {
-											p.sendMessage(prefix + "§6You have not specified a location!");
-										}
-										if (name != true) {
-											p.sendMessage(prefix + "§6You have not specified a name!");
-										}
-									return true;
 									} else{
-										this.getConfig().set(slot + ".Enabled", true);
-										this.saveConfig();
-										p.sendMessage(prefix + "§6Enabled slot " + slot);
-										slot = "0";
-										item = false;
-										loc = false;
-										name = false;
+										if(item != true || name != true){
+											p.sendMessage(prefix + "§6You have not set all of the required items");
+											if (item != true) {
+												p.sendMessage(prefix + "§6You have not specified an item!");
+											}
+											if (name != true) {
+												p.sendMessage(prefix + "§6You have not specified a name!");
+											}
+										} else{
+											this.getConfig().set(slot + ".Enabled", true);
+											this.saveConfig();
+											p.sendMessage(prefix + "§6Enabled slot " + slot);
+											slot = "0";
+											item = false;
+											loc = false;
+											name = false;
+											bungee = false;
+										}
 									}
 									return true;
 								}
