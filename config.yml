@@ -11,7 +11,7 @@
 # Up to 6 rows are supported.
 # Don't forget to add items to the config!
 
-Item: COMPASS
+Item: 345
 GUIName: CompassNavigation
 Rows: 1
 1:
