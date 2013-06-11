@@ -8,6 +8,7 @@
 # Pitch: -90 = Sky, +90 = Floor
 # The name and lore can have colour codes.  The colourcode is '&', e.g. '&6' for gold
 # Up to 6 rows are supported.
+# You can specify data values for the item. For example: 35:2
 # Don't forget to add items to the config!
 
 Item: 345
