@@ -27,9 +27,9 @@ public class EventListener implements Listener{
     	plugin = p;
     }
     
-    public boolean sectionExists(int slot) {
+    public boolean sectionExists(int slot, String section) {
     	try {
-    		plugin.getConfig().getString(slot + ".Enabled");
+    		plugin.getConfig().getString(slot + section);
     		return true;
     	} catch(Exception e) {
     		return false;
@@ -37,11 +37,11 @@ public class EventListener implements Listener{
     }
 	
     public void handleRow(Player player, int slot, Inventory chest) {
-    	if (this.sectionExists(slot)) {
+    	if (this.sectionExists(slot, ".Enabled")) {
     		if(plugin.getConfig().getString(slot + ".Enabled") == "true") {
     			Ls.clear();
     			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
-				if(plugin.getConfig().getString(slot + ".Desc") != "null") {
+				if (this.sectionExists(slot, ".Desc")) {
 					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
 				}
 				if(player.hasPermission("compassnav.slot." + slot)) {
@@ -125,7 +125,7 @@ public class EventListener implements Listener{
 							int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
 							for (int slot : rows) {
 								if (e.getRawSlot() == slot - 1) {
-									if (this.sectionExists(slot)) {
+									if (this.sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if (player.hasPermission("compassnav.slot." + slot)) {
 												if (plugin.getConfig().contains(slot + ".Server")) {
