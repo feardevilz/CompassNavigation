@@ -99,7 +99,7 @@ public final class CompassNavigation extends JavaPlugin {
     								this.getConfig().set(slot + ".Y", p.getLocation().getY());
     								this.getConfig().set(slot + ".Z", p.getLocation().getZ());
     								this.getConfig().set(slot + ".Yaw", p.getLocation().getYaw());
-    								this.getConfig().set(slot + ".Yaw", p.getLocation().getPitch());
+    								this.getConfig().set(slot + ".Pitch", p.getLocation().getPitch());
     								return true;
     							} else if (args[1].equalsIgnoreCase("name")) {
     								if(args[2] != null){
