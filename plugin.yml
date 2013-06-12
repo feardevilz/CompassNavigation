@@ -4,7 +4,7 @@ description: This plugin allows you to create a usable compass that teleports yo
 website: http://dev.bukkit.org/bukkit-mods/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
 authors: [Adzwoolly, xMRKIRO]
-softdepend: [BungeeCord]
+softdepend: [BungeeCord, Essentials]
 commands:
   compassnav:
     description: Allows you to reload configuration and set up the plugin ingame.
