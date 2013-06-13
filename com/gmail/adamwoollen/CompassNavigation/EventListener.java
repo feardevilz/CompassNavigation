@@ -40,11 +40,18 @@ public class EventListener implements Listener{
     		if(plugin.getConfig().getString(slot + ".Enabled") == "true") {
     			Ls.clear();
     			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
+    			String Item = plugin.getConfig().getString(slot + ".Item");
+    			short Damage = 0;
+    			String[] Meta = Item.split(":");
+    			int ID = Integer.parseInt(Meta[0]);
+    			if (Meta.length == 2) {
+    				Damage = Short.parseShort(Meta[1]);
+    			}
 				if (this.sectionExists(slot, ".Desc")) {
 					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
 				}
 				if(player.hasPermission("compassnav.slot." + slot)) {
-					chest.setItem(slot - 1, setName(new ItemStack(plugin.getConfig().getInt(slot + ".Item"), 1), Name, Ls));
+					chest.setItem(slot - 1, setName(new ItemStack(ID, 1, Damage), Name, Ls));
 				} else {
 					Ls.add("§4No permission");
 					chest.setItem(slot - 1, setName(new ItemStack(36, 1), Name, Ls));
