@@ -2,13 +2,16 @@
 # Each number represents the slot in the compass GUI.
 # If the slot is not in use, set Enabled to False!
 # Item is the item to represent the teleport in the Compass GUI.
-# Use item IDs for specifying an item!
-# http://www.minecraftwiki.net/wiki/Data_values#Item_IDs
+# Use IDs for specifying an item!
+# http://www.minecraftwiki.net/wiki/Data_values
 # Please use a whole number (not decimal) for Yaw and Pitch
 # Pitch: -90 = Sky, +90 = Floor
-# The name and lore can have colour codes.  The colourcode is '&', e.g. '&6' for gold
+# The name and lore, aka description can have colour codes.  The colourcode is '&', e.g. '&6' for gold
 # Up to 6 rows are supported.
 # You can specify data values for the item. For example: 35:2
+# You can specify Essentials warps using the Warp option.
+# You can also specify BungeeCord servers using the Bungee option.
+# You can set up slots ingame with /cn setup!
 # Don't forget to add items to the config!
 
 Item: 345
@@ -17,14 +20,14 @@ Rows: 1
 1:
   Enabled: true
   Item: 51
-  Name: To &6fire land!
-  Desc: To the land of fire!
+  Name: &6&lFire Land
+  Desc: &eTo the land of &6fire!
   World: world
-  X: 70
-  Y: 76
-  Z: 66
+  X: 0
+  Y: 64
+  Z: 0
   Yaw: 0
-  Pitch: 90
+  Pitch: 0
 DisabledWorlds:
-  - myworld
-  - potatoworld
+  - example1
+  - example2
