@@ -49,6 +49,33 @@ permissions:
       compassnav.slot.25: true
       compassnav.slot.26: true
       compassnav.slot.27: true
+      compassnav.slot.28: true
+      compassnav.slot.29: true
+      compassnav.slot.30: true
+      compassnav.slot.31: true
+      compassnav.slot.32: true
+      compassnav.slot.33: true
+      compassnav.slot.34: true
+      compassnav.slot.35: true
+      compassnav.slot.36: true
+      compassnav.slot.37: true
+      compassnav.slot.38: true
+      compassnav.slot.39: true
+      compassnav.slot.40: true
+      compassnav.slot.41: true
+      compassnav.slot.42: true
+      compassnav.slot.43: true
+      compassnav.slot.44: true
+      compassnav.slot.45: true
+      compassnav.slot.46: true
+      compassnav.slot.47: true
+      compassnav.slot.48: true
+      compassnav.slot.49: true
+      compassnav.slot.50: true
+      compassnav.slot.51: true
+      compassnav.slot.52: true
+      compassnav.slot.53: true
+      compassnav.slot.54: true
   compassnav.admin:
     description: Allows usage of CompassNavigation admin commands.
     default: op
