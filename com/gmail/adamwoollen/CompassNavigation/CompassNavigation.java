@@ -25,6 +25,20 @@ public final class CompassNavigation extends JavaPlugin {
 	// §e: Yellow
 	// §f: White
 	
+	// NEWS:
+	// I have cleaned up the source a bit.
+	// I have changed over from ChatColor to § format.
+	// I have made permissions more flexible. There is 2 collective permissions, that
+	// allows players to do everything: compassnav.* and compassnav.admin.
+	// Fixed a nasty bug that would mess up everything.
+	// Fixed a nasty nasty bug that would let only Console use /cnsetup with 2 
+	// parameters. Very very nasty bug.
+	// Fixed a bug that ignores an item slot. Possible fix for the bug.
+	// Added 3 new rows (Like a large chest) =D
+	// Another possible fix for the inventory bug: On inventory interact I made an item
+	// check: It only starts the checking if you are holding the compass item.
+	// I have changed the "No permission" lore to a dark red one, instead of colorless.
+	
 	public void onEnable() {
         this.saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
@@ -126,8 +140,8 @@ public final class CompassNavigation extends JavaPlugin {
 									this.sendSetupMessage(p, slot);
 								}
 							}
-							if (!slot.equals("0")) {
-								if (p.hasPermission("compassnav.admin.setup")) {
+							if (p.hasPermission("compassnav.admin.setup")) {
+								if (!slot.equals("0")) {
 									if (args[1].equalsIgnoreCase("loc")) {
 										this.getConfig().set(slot + ".World", p.getWorld().getName());
 										this.getConfig().set(slot + ".X", p.getLocation().getX());
@@ -140,13 +154,17 @@ public final class CompassNavigation extends JavaPlugin {
 									} else if (args[1].equalsIgnoreCase("item")) {
 										String ID = Integer.toString(p.getItemInHand().getTypeId());
 										String Damage = Short.toString(p.getItemInHand().getDurability());
-										if (Damage != "0") {
-											this.getConfig().set(slot + ".Item", ID + ":" + Damage);
+										if (ID != "0" && (Damage != "-1")) {
+											if (Damage != "0") {
+												this.getConfig().set(slot + ".Item", ID + ":" + Damage);
+											} else {
+												this.getConfig().set(slot + ".Item", ID);
+											}
+											p.sendMessage(prefix + "§6Item set for slot " + slot + "!");
+											this.saveConfig();
 										} else {
-											this.getConfig().set(slot + ".Item", ID);
+											p.sendMessage(prefix + "§6An error happened while trying to set the item. Are you sure it isn't air?");
 										}
-										p.sendMessage(prefix + "§6Item set for slot " + slot + "!");
-										this.saveConfig();
 									} else if (args[1].equalsIgnoreCase("enable")){
 										this.getConfig().set(slot + ".Enabled", true);
 										this.saveConfig();
@@ -165,33 +183,23 @@ public final class CompassNavigation extends JavaPlugin {
 										this.getConfig().set(slot + ".Warp", null);
 										p.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
 										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("loc")) {
-										this.getConfig().set(slot + ".World", null);
-										this.getConfig().set(slot + ".X", null);
-										this.getConfig().set(slot + ".Y", null);
-										this.getConfig().set(slot + ".Z", null);
-										this.getConfig().set(slot + ".Yaw", null);
-										this.getConfig().set(slot + ".Pitch", null);
-										p.sendMessage(prefix + "§6Location unset for slot " + slot + "!");
-										this.saveConfig();
 									} else {
 										this.sendSetupMessage(p, slot);
 									}
 								} else {
-									p.sendMessage("§4You do not have access to that command.");
+									p.sendMessage(prefix + "§6You haven't specified a slot to modify.");
 								}
 							} else {
-								p.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+								p.sendMessage("§4You do not have access to that command.");
 							}
-					}
 				} else {
 					getLogger().info("[CN] This command can only be ran by ingame players.");
 				}
-			} else if (args.length == 3) {
-				Player p = (Player) sender;
+			} else if (args.length >= 3) {
 				if (sender instanceof Player) {
-					if (!slot.equals("0")) {
-						if (p.hasPermission("compassnav.admin.setup")) {
+					Player p = (Player) sender;
+					if (p.hasPermission("compassnav.admin.setup")) {
+						if (!slot.equals("0")) {
 							if (args[0].equalsIgnoreCase("setup")) {
 								if (args[1].equalsIgnoreCase("bungee")) {
 									this.getConfig().set(slot + ".Bungee", args[2]);
@@ -216,22 +224,16 @@ public final class CompassNavigation extends JavaPlugin {
 								this.sendSetupMessage(p, slot);
 							}
 						} else {
-							p.sendMessage("§4You do not have access to that command.");
+							p.sendMessage(prefix + "§6You haven't specified a slot to modify.");
 						}
 					} else {
-						p.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+						p.sendMessage("§4You do not have access to that command.");
 					}
 				} else {
 					getLogger().info("[CN] This command can only be ran by ingame players.");
 				}
-			} else if (args.length >= 4) {
-				Player p = (Player) sender;
-				if (sender instanceof Player) {
-					this.sendSetupMessage(p, slot);
-				} else {
-					getLogger().info("[CN] This command can only be ran by ingame players.");
-				}
 			}
+    	}
     	return true;
 	}
 
