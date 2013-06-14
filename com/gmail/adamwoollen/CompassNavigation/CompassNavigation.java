@@ -1,13 +1,15 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CompassNavigation extends JavaPlugin {
 
-  // CHAT COLORS			FORMATTING CODES
+    // CHAT COLORS			FORMATTING CODES
 	// §0: Black			§k: Obfuscated
 	// §1: Dark Blue		§l: Bold
 	// §2: Dark Green		§m: Strikethrough
@@ -27,11 +29,13 @@ public final class CompassNavigation extends JavaPlugin {
 	
 	public void onEnable() {
         this.saveDefaultConfig();
+        this.getWorldGuard();
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 	}
 	
 	String prefix = "§2§l[§a§lCN§2§l] ";
 	String slot = "0";
+	private static WorldGuardHandler worldGuardHandler;
 	
 	public void sendHelpMessage(CommandSender p) {
 		if (p.hasPermission("compassnav.admin.help")) {
@@ -73,6 +77,18 @@ public final class CompassNavigation extends JavaPlugin {
 		}
 		String nameS = sb.toString().trim();
 		return nameS;
+	}
+	
+	public boolean canUseCompassHere(Location loc) {
+		return (worldGuardHandler == null) ? true : worldGuardHandler.canUseCompassHere(loc);
+	}
+	
+	public void getWorldGuard() {
+		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+		if (plugin == null || !(plugin instanceof com.sk89q.worldguard.bukkit.WorldGuardPlugin)) {
+			return;
+		}
+		worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -140,17 +156,13 @@ public final class CompassNavigation extends JavaPlugin {
 									} else if (args[1].equalsIgnoreCase("item")) {
 										String ID = Integer.toString(p.getItemInHand().getTypeId());
 										String Damage = Short.toString(p.getItemInHand().getDurability());
-										if (ID != "0" && (Damage != "-1")) {
-											if (Damage != "0") {
-												this.getConfig().set(slot + ".Item", ID + ":" + Damage);
-											} else {
-												this.getConfig().set(slot + ".Item", ID);
-											}
-											p.sendMessage(prefix + "§6Item set for slot " + slot + "!");
-											this.saveConfig();
+										if (Damage != "0") {
+											this.getConfig().set(slot + ".Item", ID + ":" + Damage);
 										} else {
-											p.sendMessage(prefix + "§6An error happened while trying to set the item. Are you sure it isn't air?");
+											this.getConfig().set(slot + ".Item", ID);
 										}
+										p.sendMessage(prefix + "§6Item set for slot " + slot + "!");
+										this.saveConfig();
 									} else if (args[1].equalsIgnoreCase("enable")){
 										this.getConfig().set(slot + ".Enabled", true);
 										this.saveConfig();
