@@ -1,5 +1,8 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -65,12 +68,16 @@ public class EventListener implements Listener{
     
     public void checkBungee(Player player, int slot) {
 		if (sectionExists(slot, ".Bungee")) {
-			if (plugin.getServer().getPluginManager().isPluginEnabled("BungeeCord")) {
-				Bukkit.dispatchCommand(player, "server " + plugin.getConfig().getString(slot + ".Bungee"));
-			} else {
-				plugin.getServer().getLogger().severe("BungeeCord not found. Using coordinates or warp for slot " + slot + ".");
-				this.checkWarp(player, slot);
-			}
+		     Bukkit.getMessenger().registerOutgoingPluginChannel(this.plugin, "BungeeCord");
+             
+		     ByteArrayOutputStream b = new ByteArrayOutputStream();
+		     DataOutputStream out = new DataOutputStream(b);
+		                      
+		     try {
+		           out.writeUTF("Connect");
+		           out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
+		      } catch (IOException ex) {}
+		      player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
 		} else {
 			this.checkWarp(player, slot);
 		}
