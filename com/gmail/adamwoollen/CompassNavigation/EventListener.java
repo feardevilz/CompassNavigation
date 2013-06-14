@@ -95,8 +95,8 @@ public class EventListener implements Listener{
     		location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
     		location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
     		location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
-			player.teleport(location);
-			player.closeInventory();
+		player.teleport(location);
+		player.closeInventory();
     	} else {
     		plugin.getServer().getLogger().severe("[CN] Could not find a valid destination for slot " + slot +"!");
     		player.sendMessage(plugin.prefix + "§6Could not find a valid destination.");
