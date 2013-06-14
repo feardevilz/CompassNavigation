@@ -49,7 +49,11 @@ public class EventListener implements Listener{
 				if (this.sectionExists(slot, ".Desc")) {
 					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
 				}
-				if(player.hasPermission("compassnav.slot." + slot)) {
+				if (ID == 0) {
+					ID = 36;
+					Damage = 0;
+				}
+				if (player.hasPermission("compassnav.slot." + slot)) {
 					chest.setItem(slot - 1, setName(new ItemStack(ID, 1, Damage), Name, Ls));
 				} else {
 					Ls.add("§4No permission");
@@ -95,11 +99,12 @@ public class EventListener implements Listener{
     		location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
     		location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
     		location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
-		player.teleport(location);
-		player.closeInventory();
+			player.teleport(location);
+			player.closeInventory();
     	} else {
     		plugin.getServer().getLogger().severe("[CN] Could not find a valid destination for slot " + slot +"!");
     		player.sendMessage(plugin.prefix + "§6Could not find a valid destination.");
+    		player.closeInventory();
     	}
     }
     
