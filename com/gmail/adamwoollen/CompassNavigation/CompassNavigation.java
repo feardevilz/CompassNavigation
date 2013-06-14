@@ -30,6 +30,9 @@ public final class CompassNavigation extends JavaPlugin {
 	public void onEnable() {
         this.saveDefaultConfig();
         this.getWorldGuard();
+        if (getServer().getPluginManager().isPluginEnabled("WorldGuard") && (getServer().getPluginManager().isPluginEnabled("WorldEdit"))) {
+        	getLogger().info("[CN] Succesfully hooked into WorldGuard!");
+        }
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 	}
 	
