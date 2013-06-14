@@ -111,7 +111,7 @@ public class EventListener implements Listener{
 		    	if (player.hasPermission("compassnav.use")) {
 					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
-		    		} else if (plugin.canUseCompassHere(player.getLocation())) {
+		    		} else if (!plugin.canUseCompassHere(player.getLocation())) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
