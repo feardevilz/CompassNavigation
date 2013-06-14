@@ -28,7 +28,7 @@ public class EventListener implements Listener{
     }
     
     public boolean sectionExists(int slot, String path){
-    	if(plugin.getConfig().contains(slot + path)){
+    	if (plugin.getConfig().contains(slot + path)) {
     		return true;
     	}
     	return false;
@@ -109,8 +109,10 @@ public class EventListener implements Listener{
 		    Player player = e.getPlayer();
 		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
 		    	if (player.hasPermission("compassnav.use")) {
-		    		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
+					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
+		    		} else if (plugin.canUseCompassHere(player.getLocation())) {
+		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
 		    		
