@@ -25,20 +25,6 @@ public final class CompassNavigation extends JavaPlugin {
 	// §e: Yellow
 	// §f: White
 	
-	// NEWS:
-	// I have cleaned up the source a bit.
-	// I have changed over from ChatColor to § format.
-	// I have made permissions more flexible. There is 2 collective permissions, that
-	// allows players to do everything: compassnav.* and compassnav.admin.
-	// Fixed a nasty bug that would mess up everything.
-	// Fixed a nasty nasty bug that would let only Console use /cnsetup with 2 
-	// parameters. Very very nasty bug.
-	// Fixed a bug that ignores an item slot. Possible fix for the bug.
-	// Added 3 new rows (Like a large chest) =D
-	// Another possible fix for the inventory bug: On inventory interact I made an item
-	// check: It only starts the checking if you are holding the compass item.
-	// I have changed the "No permission" lore to a dark red one, instead of colorless.
-	
 	public void onEnable() {
         this.saveDefaultConfig();
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
