@@ -164,7 +164,7 @@ public class EventListener implements Listener{
 													if (plugin.getServer().getPluginManager().isPluginEnabled("BungeeCord")) {
 														player.chat("/server " + plugin.getConfig().getString(slot + ".Bungee"));
 													} else {
-														plugin.getServer().getLogger().severe("BungeeCord not found. Using coordinates or warp for slot" + slot + ".");
+														plugin.getServer().getLogger().severe("BungeeCord not found. Using coordinates or warp for slot " + slot + ".");
 														this.checkWarp(player, slot);
 													}
 												} else {
