@@ -62,7 +62,7 @@ public class WorldGuardHandler {
 				globalRegionManager.preload();
 
 			} catch (Exception e) {
-				Bukkit.getLogger().severe("An error has happened:");
+				Bukkit.getLogger().severe("An error has happened. Please include this in your error reports:");
 				e.printStackTrace();
 			}
 		}
