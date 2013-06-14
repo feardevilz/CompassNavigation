@@ -2,11 +2,12 @@
 # Each number represents the slot in the compass GUI.
 # If the slot is not in use, set Enabled to False!
 # Item is the item to represent the teleport in the Compass GUI.
-# Use IDs for specifying an item!
+# Use IDs for specifying an item:
 # http://www.minecraftwiki.net/wiki/Data_values
-# Please use a whole number (not decimal) for Yaw and Pitch
 # Pitch: -90 = Sky, +90 = Floor
 # The name and lore, aka description can have colour codes.  The colourcode is '&', e.g. '&6' for gold
+# For colour codes please check:
+# http://www.minecraftwiki.net/wiki/Formatting_codes
 # Up to 6 rows are supported.
 # You can specify data values for the item. For example: 35:2
 # You can specify Essentials warps using the Warp option.
