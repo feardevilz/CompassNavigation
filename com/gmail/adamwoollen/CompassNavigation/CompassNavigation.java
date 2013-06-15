@@ -1,10 +1,13 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
+import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CompassNavigation extends JavaPlugin {
@@ -30,15 +33,15 @@ public final class CompassNavigation extends JavaPlugin {
 	public void onEnable() {
         this.saveDefaultConfig();
         this.getWorldGuard();
-        if (getServer().getPluginManager().isPluginEnabled("WorldGuard") && (getServer().getPluginManager().isPluginEnabled("WorldEdit"))) {
-        	getLogger().info("[CN] Succesfully hooked into WorldGuard!");
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+        	getLogger().info("[CN] Succesfully hooked into Vault for economy!");
         }
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 	}
 	
 	String prefix = "§2§l[§a§lCN§2§l] ";
 	String slot = "0";
-	private static WorldGuardHandler worldGuardHandler;
+	public static WorldGuardHandler worldGuardHandler;
 	
 	public void sendHelpMessage(CommandSender p) {
 		if (p.hasPermission("compassnav.admin.help")) {
@@ -91,8 +94,23 @@ public final class CompassNavigation extends JavaPlugin {
 		if (plugin == null || !(plugin instanceof com.sk89q.worldguard.bukkit.WorldGuardPlugin)) {
 			return;
 		}
+		getLogger().info("[CN] Succesfully hooked into WorldGuard!");
 		worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
 	}
+	
+	VaultHandler getVault() {
+		Plugin plugin = getServer().getPluginManager().getPlugin("Vault");
+		if (plugin == null || !(plugin instanceof net.milkbowl.vault.Vault)) {
+			return null;
+		}
+		RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+		if (rsp == null) {
+			return null;
+		}
+		getLogger().info("[CN] Succesfully hooked into Vault!");
+		return new VaultHandler(this, rsp.getProvider());
+	}
+
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
     	if(cmd.getName().equalsIgnoreCase("compassnav") || (cmd.getName().equalsIgnoreCase("cn"))) {
@@ -171,7 +189,6 @@ public final class CompassNavigation extends JavaPlugin {
 										this.saveConfig();
 										p.sendMessage(prefix + "§6Enabled slot " + slot + ".");
 										slot = "0";
-										}
 									} else if (args[1].equalsIgnoreCase("bungee")) {
 										this.getConfig().set(slot + ".Bungee", null);
 										p.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
@@ -183,6 +200,10 @@ public final class CompassNavigation extends JavaPlugin {
 									} else if (args[1].equalsIgnoreCase("warp")) {
 										this.getConfig().set(slot + ".Warp", null);
 										p.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
+										this.saveConfig();
+									} else if (args[1].equalsIgnoreCase("price")) {
+										this.getConfig().set(slot + ".Price", null);
+										p.sendMessage(prefix + "§6Price unset for slot " + slot + "!");
 										this.saveConfig();
 									} else {
 										this.sendSetupMessage(p, slot);
@@ -218,6 +239,10 @@ public final class CompassNavigation extends JavaPlugin {
 									this.getConfig().set(slot + ".Warp", handleString(args));
 									p.sendMessage(prefix + "§6Warp set for slot " + slot + "!");
 									this.saveConfig();
+								} else if (args[1].equalsIgnoreCase("price")) {
+									this.getConfig().set(slot + ".Price", Double.parseDouble(args[2]));
+									p.sendMessage(prefix + "§6Price set for slot " + slot + "!");
+									this.saveConfig();
 								} else {
 									this.sendSetupMessage(p, slot);
 								}
@@ -234,6 +259,7 @@ public final class CompassNavigation extends JavaPlugin {
 					getLogger().info("[CN] This command can only be ran by ingame players.");
 				}
 			}
+    	}
     	}
     	return true;
 	}
