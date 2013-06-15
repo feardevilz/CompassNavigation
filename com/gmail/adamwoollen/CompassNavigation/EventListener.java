@@ -3,8 +3,8 @@ package com.gmail.adamwoollen.CompassNavigation;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,8 +21,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class EventListener implements Listener{
-  
-    private CompassNavigation plugin;
+	
+	public CompassNavigation plugin;
     public Inventory chest;
     public List<String> Ls = new ArrayList<String>();
     
@@ -52,6 +52,13 @@ public class EventListener implements Listener{
 				if (this.sectionExists(slot, ".Desc")) {
 					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
 				}
+				if (!player.hasPermission("compassnav.perks.free." + slot)) {
+					if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
+						if (this.sectionExists(slot, ".Price")) {
+							Ls.add("§2Price: §a$" + plugin.getConfig().getDouble(slot + ".Price"));
+						}
+					}
+				}
 				if (ID == 0) {
 					ID = 36;
 					Damage = 0;
@@ -66,6 +73,29 @@ public class EventListener implements Listener{
     	}
     }
     
+    public void checkMoney(Player player, int slot) {
+		if (this.sectionExists(slot, ".Price")) {
+			Double amount = plugin.getConfig().getDouble(slot + ".Price");
+			String name = player.getName();
+			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
+				if (!player.hasPermission("compassnav.perks.free." + slot)) {
+					if (plugin.getVault().hasEnough(name, amount)) {
+						plugin.getVault().subtract(name, amount);
+						player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(amount) + " §6from you!");
+						this.checkBungee(player, slot);
+					} else {
+						player.sendMessage(plugin.prefix + "§6You do not have enough money!");
+						player.closeInventory();
+					}
+				}
+			} else {
+				this.checkBungee(player, slot);
+			}
+		} else {
+			this.checkBungee(player, slot);
+		}
+    }
+    
     public void checkBungee(Player player, int slot) {
 		if (sectionExists(slot, ".Bungee")) {
 		     Bukkit.getMessenger().registerOutgoingPluginChannel(this.plugin, "BungeeCord");
@@ -77,7 +107,7 @@ public class EventListener implements Listener{
 		           out.writeUTF("Connect");
 		           out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
 		      } catch (IOException ex) {}
-		      player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
+		     player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
 		} else {
 			this.checkWarp(player, slot);
 		}
@@ -121,9 +151,9 @@ public class EventListener implements Listener{
 		    Player player = e.getPlayer();
 		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
 		    	if (player.hasPermission("compassnav.use")) {
-					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) {
+					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
-		    		} else if (!plugin.canUseCompassHere(player.getLocation())) {
+		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
 		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
@@ -191,7 +221,7 @@ public class EventListener implements Listener{
 									if (this.sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if (player.hasPermission("compassnav.slot." + slot)) {
-												this.checkBungee(player, slot);
+												this.checkMoney(player, slot);
 											}
 										}
 									}
