@@ -5,13 +5,14 @@
 # Use IDs for specifying an item:
 # http://www.minecraftwiki.net/wiki/Data_values
 # Pitch: -90 = Sky, +90 = Floor
-# The name and lore, aka description can have colour codes.  The colourcode is '&', e.g. '&6' for gold
+# The name and lore, aka description can have colour codes. The colourcode is '&', e.g. '&6' for gold
 # For colour codes please check:
 # http://www.minecraftwiki.net/wiki/Formatting_codes
 # Up to 6 rows are supported.
 # You can specify data values for the item. For example: 35:2
 # You can specify Essentials warps using the Warp option.
 # You can also specify BungeeCord servers using the Bungee option.
+# You can specify prices for using certain slots with the Price option.
 # You can set up slots ingame with /cn setup!
 # Don't forget to add items to the config!
 
