@@ -69,6 +69,7 @@ public final class CompassNavigation extends JavaPlugin {
 			p.sendMessage("§2/compassnav setup item§a - Sets item from hand");
 			p.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
 			p.sendMessage("§2/compassnav setup desc <description>§a - Sets item description");
+			p.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
 			p.sendMessage("§2/compassnav setup enable§a - Enables slot");
 			p.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 		} else {
