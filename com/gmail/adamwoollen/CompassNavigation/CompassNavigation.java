@@ -70,6 +70,7 @@ public final class CompassNavigation extends JavaPlugin {
 			p.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
 			p.sendMessage("§2/compassnav setup desc <description>§a - Sets item description");
 			p.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
+			p.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
 			p.sendMessage("§2/compassnav setup enable§a - Enables slot");
 			p.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 		} else {
@@ -206,6 +207,21 @@ public final class CompassNavigation extends JavaPlugin {
 										this.getConfig().set(slot + ".Price", null);
 										p.sendMessage(prefix + "§6Price unset for slot " + slot + "!");
 										this.saveConfig();
+									} else if (args[1].equalsIgnoreCase("amount")) {
+										this.getConfig().set(slot + ".Amount", null);
+										p.sendMessage(prefix + "§6Amount unset for slot " + slot + "!");
+										this.saveConfig();
+									} else if (args[1].equalsIgnoreCase("enchant")) {
+										Boolean eState = this.getConfig().getBoolean(slot + ".Enchanted");
+										if (eState == true) {
+											this.getConfig().set(slot + ".Enchanted", false);	
+											p.sendMessage(prefix + "§6Removed enchant from slot " + slot + "!");
+											this.saveConfig();
+										} else {
+											this.getConfig().set(slot + ".Enchanted", true);
+											p.sendMessage(prefix + "§6Added enchant for slot " + slot + "!");
+											this.saveConfig();
+										}
 									} else {
 										this.sendSetupMessage(p, slot);
 									}
@@ -244,11 +260,20 @@ public final class CompassNavigation extends JavaPlugin {
 									this.getConfig().set(slot + ".Price", Double.parseDouble(args[2]));
 									p.sendMessage(prefix + "§6Price set for slot " + slot + "!");
 									this.saveConfig();
+								} else if (args[1].equalsIgnoreCase("amount")) {
+									int iAmount = Integer.parseInt(args[2]);
+									if ((iAmount >= 1) && (iAmount <= 64)) {
+										this.getConfig().set(slot + ".Amount", iAmount);
+										p.sendMessage(prefix + "§6Amount set for slot " + slot + "!");
+										this.saveConfig();
+									} else {
+										p.sendMessage(prefix + "§6Invalid amount specified.");
+									}
 								} else {
 									this.sendSetupMessage(p, slot);
 								}
 							} else {
-								this.sendSetupMessage(p, slot);
+								this.sendHelpMessage(p);
 							}
 						} else {
 							p.sendMessage(prefix + "§6You haven't specified a slot to modify.");
