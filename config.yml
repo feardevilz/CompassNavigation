@@ -13,6 +13,8 @@
 # You can specify Essentials warps using the Warp option.
 # You can also specify BungeeCord servers using the Bungee option.
 # You can specify prices for using certain slots with the Price option.
+# You can specify item amouints with the Amount option.
+# You can specify enchanted status with the Enchanted option (true or false).
 # You can set up slots ingame with /cn setup!
 # Don't forget to add items to the config!
 
