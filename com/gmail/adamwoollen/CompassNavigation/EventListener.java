@@ -9,6 +9,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,18 +40,31 @@ public class EventListener implements Listener{
 	
     public void handleSlot(Player player, int slot, Inventory chest) {
     	if (this.sectionExists(slot, ".Enabled")) {
-    		if(plugin.getConfig().getString(slot + ".Enabled") == "true") {
+    		if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
     			Ls.clear();
     			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
     			String Item = plugin.getConfig().getString(slot + ".Item");
     			short Damage = 0;
+    			int Amount = 1;
     			String[] Meta = Item.split(":");
     			int ID = Integer.parseInt(Meta[0]);
     			if (Meta.length == 2) {
     				Damage = Short.parseShort(Meta[1]);
     			}
+    			if (this.sectionExists(slot, ".Amount")) {
+    				int iAmount = plugin.getConfig().getInt(slot + ".Amount");
+    				if ((iAmount <= 64) && (iAmount >= 1)) {
+    					Amount = iAmount;
+    				}
+    			}
 				if (this.sectionExists(slot, ".Desc")) {
 					Ls.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
+				}
+				ItemStack stack = new ItemStack(ID, Amount, Damage);
+				if (this.sectionExists(slot, ".Enchanted")) {
+					if (plugin.getConfig().getBoolean(slot + ".Enchanted") == true) {
+						stack.addEnchantment(Enchantment.DURABILITY, 1);
+					}
 				}
 				if (!player.hasPermission("compassnav.perks.free." + slot)) {
 					if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
@@ -59,14 +73,12 @@ public class EventListener implements Listener{
 						}
 					}
 				}
-				if (ID == 0) {
-					ID = 36;
-					Damage = 0;
-				}
-				if (player.hasPermission("compassnav.slot." + slot)) {
-					chest.setItem(slot - 1, setName(new ItemStack(ID, 1, Damage), Name, Ls));
+				if (player.hasPermission("compassnav.slot." + slot) && ((ID != 0) || (Damage != -1))) {
+					chest.setItem(slot - 1, setName(stack, Name, Ls));
 				} else {
-					Ls.add("§4No permission");
+					if ((ID != 0) || (Damage != -1)) {
+						Ls.add("§4No permission");
+					}
 					chest.setItem(slot - 1, setName(new ItemStack(36, 1), Name, Ls));
 				}
     		}
@@ -75,13 +87,13 @@ public class EventListener implements Listener{
     
     public void checkMoney(Player player, int slot) {
 		if (this.sectionExists(slot, ".Price")) {
-			Double amount = plugin.getConfig().getDouble(slot + ".Price");
+			Double price = plugin.getConfig().getDouble(slot + ".Price");
 			String name = player.getName();
 			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
 				if (!player.hasPermission("compassnav.perks.free." + slot)) {
-					if (plugin.getVault().hasEnough(name, amount)) {
-						plugin.getVault().subtract(name, amount);
-						player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(amount) + " §6from you!");
+					if (plugin.getVault().hasEnough(name, price)) {
+						plugin.getVault().subtract(name, price);
+						player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
 						this.checkBungee(player, slot);
 					} else {
 						player.sendMessage(plugin.prefix + "§6You do not have enough money!");
@@ -241,6 +253,7 @@ public class EventListener implements Listener{
 			IM.setDisplayName(name);
 		}
 		if (lore != null) {
+			IM.setLore(new ArrayList<String>());
 			IM.setLore(lore);
 		}
 		is.setItemMeta(IM);
