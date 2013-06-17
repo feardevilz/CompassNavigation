@@ -9,6 +9,8 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -157,65 +159,80 @@ public class EventListener implements Listener{
     	}
     }
     
+    public void makeChest(Player player, PlayerInteractEvent e){
+    	if (player.hasPermission("compassnav.use")) {
+			if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
+    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+    		} else {
+    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
+    		
+    			int[] row1 = {1,2,3,4,5,6,7,8,9};
+	   			int[] row2 = {10,11,12,13,14,15,16,17,18};
+	   			int[] row3 = {19,20,21,22,23,24,25,26,27};
+	   			int[] row4 = {28,29,30,31,32,33,34,35,36};
+	   			int[] row5 = {37,38,39,40,41,42,43,44,45};
+	   			int[] row6 = {46,47,48,49,50,51,52,53,54};
+				
+	   			for (int slot : row1) {
+	   				this.handleSlot(player, slot, chest);
+	   			}
+			
+    			if (plugin.getConfig().getInt("Rows") >= 2) {	
+    				for (int slot : row2) {
+    					this.handleSlot(player, slot, chest);
+    				}
+    			}
+    			
+    			if (plugin.getConfig().getInt("Rows") >= 3) {	
+    				for (int slot : row3) {
+    					this.handleSlot(player, slot, chest);
+    				}
+    			}
+    		
+    			if (plugin.getConfig().getInt("Rows") >= 4) {	
+    				for (int slot : row4) {
+    					this.handleSlot(player, slot, chest);
+    				}
+    			}
+   			
+    			if (plugin.getConfig().getInt("Rows") >= 5) {	
+    				for (int slot : row5) {
+    					this.handleSlot(player, slot, chest);
+    				}
+    			}
+    			
+    			if (plugin.getConfig().getInt("Rows") >= 6) {	
+    				for (int slot : row6) {
+    					this.handleSlot(player, slot, chest);
+    				}
+    			}
+    			
+    			player.openInventory(chest);
+    			e.setCancelled(true);
+    		}
+		}
+    }
+    
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e){
-		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-		    Player player = e.getPlayer();
+		Player player = e.getPlayer();
+		if (e.getAction() == Action.RIGHT_CLICK_AIR) { 
 		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
-		    	if (player.hasPermission("compassnav.use")) {
-					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
-		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
-		    		} else {
-		    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
-		    		
-		    			int[] row1 = {1,2,3,4,5,6,7,8,9};
-			   			int[] row2 = {10,11,12,13,14,15,16,17,18};
-			   			int[] row3 = {19,20,21,22,23,24,25,26,27};
-			   			int[] row4 = {28,29,30,31,32,33,34,35,36};
-			   			int[] row5 = {37,38,39,40,41,42,43,44,45};
-			   			int[] row6 = {46,47,48,49,50,51,52,53,54};
-	    				
-			   			for (int slot : row1) {
-			   				this.handleSlot(player, slot, chest);
-			   			}
-	    			
-		    			if (plugin.getConfig().getInt("Rows") >= 2) {	
-		    				for (int slot : row2) {
-		    					this.handleSlot(player, slot, chest);
-		    				}
-		    			}
-		    			
-		    			if (plugin.getConfig().getInt("Rows") >= 3) {	
-		    				for (int slot : row3) {
-		    					this.handleSlot(player, slot, chest);
-		    				}
-		    			}
-		    		
-		    			if (plugin.getConfig().getInt("Rows") >= 4) {	
-		    				for (int slot : row4) {
-		    					this.handleSlot(player, slot, chest);
-		    				}
-		    			}
-		   			
-		    			if (plugin.getConfig().getInt("Rows") >= 5) {	
-		    				for (int slot : row5) {
-		    					this.handleSlot(player, slot, chest);
-		    				}
-		    			}
-		    			
-		    			if (plugin.getConfig().getInt("Rows") >= 6) {	
-		    				for (int slot : row6) {
-		    					this.handleSlot(player, slot, chest);
-		    				}
-		    			}
-		    			
-		    			player.openInventory(chest);
-		    			e.setCancelled(true);
-		    		}
-		    	}
+		    	makeChest(player, e);
 		    }
+		} else if(e.getAction() == Action.RIGHT_CLICK_BLOCK){
+			if (e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN){
+				Sign s = (Sign) e.getClickedBlock().getState();
+				if (s.getLine(0).equalsIgnoreCase(plugin.getConfig().getString("SignClaim"))){
+					makeChest(player, e);
+					return;
+				}
+		    }
+			if(player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")){
+				makeChest(player, e);
+			}
 		}
 	}
 	
