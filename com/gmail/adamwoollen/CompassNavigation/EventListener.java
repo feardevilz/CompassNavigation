@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
@@ -205,6 +206,7 @@ public class EventListener implements Listener {
 		}
 		
 		player.openInventory(chest);
+		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     }
     
 	@EventHandler
@@ -240,7 +242,10 @@ public class EventListener implements Listener {
 									if (this.sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if (player.hasPermission("compassnav.slot." + slot)) {
+												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 												this.checkMoney(player, slot);
+											} else {
+												player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 											}
 										}
 									}
@@ -257,7 +262,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onSignInteract(PlayerInteractEvent event) {
 		Block block = event.getClickedBlock();
-		if (event.getPlayer().hasPermission("compassnav.sign.use")) {
+		if (event.getPlayer().hasPermission("compassnav.admin.sign.use")) {
 			if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
 				if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
 					Sign sign = (Sign) block.getState();
@@ -273,7 +278,7 @@ public class EventListener implements Listener {
 	public void onSignCreate(SignChangeEvent event) {
 		String line = event.getLine(0);
 		if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))))) {
-			if (event.getPlayer().hasPermission("compassnav.sign.create")) {
+			if (event.getPlayer().hasPermission("compassnav.admin.sign.create")) {
 				event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
 				event.getPlayer().sendMessage(plugin.prefix + "§6Succesfully created a Teleport sign!");
 			} else {
