@@ -19,8 +19,11 @@
 # Don't forget to add items to the config!
 
 Item: 345
-GUIName: CompassNavigation
+GUIName: 'CompassNavigation'
 Rows: 1
+Prefix: '&2&l[&a&lCN&2&l]'
+SignName: '&1[Teleport]'
+NoPermSignName: '&4[Teleport]'
 1:
   Enabled: true
   Item: '51'
