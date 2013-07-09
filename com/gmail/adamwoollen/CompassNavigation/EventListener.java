@@ -2,20 +2,21 @@ package com.gmail.adamwoollen.CompassNavigation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -23,17 +24,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class EventListener implements Listener{
+public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
     public Inventory chest;
-    public List<String> Ls = new ArrayList<String>();
+    public List<String> Ls = new CopyOnWriteArrayList<String>();
     
     public EventListener(CompassNavigation p) {
     	plugin = p;
     }
     
-    public boolean sectionExists(int slot, String path){
+    public boolean sectionExists(int slot, String path) {
     	if (plugin.getConfig().contains(slot + path)) {
     		return true;
     	}
@@ -120,7 +121,7 @@ public class EventListener implements Listener{
 		     try {
 		           out.writeUTF("Connect");
 		           out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
-		      } catch (IOException ex) {}
+		      } catch (Exception e) {}
 		     player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
 		} else {
 			this.checkWarp(player, slot);
@@ -159,80 +160,69 @@ public class EventListener implements Listener{
     	}
     }
     
-    public void makeChest(Player player, PlayerInteractEvent e){
-    	if (player.hasPermission("compassnav.use")) {
-			if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world.");
-    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
-    		} else {
-    			Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
-    		
-    			int[] row1 = {1,2,3,4,5,6,7,8,9};
-	   			int[] row2 = {10,11,12,13,14,15,16,17,18};
-	   			int[] row3 = {19,20,21,22,23,24,25,26,27};
-	   			int[] row4 = {28,29,30,31,32,33,34,35,36};
-	   			int[] row5 = {37,38,39,40,41,42,43,44,45};
-	   			int[] row6 = {46,47,48,49,50,51,52,53,54};
+    public void openInventory(Player player) {
+		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
+		
+		int[] row1 = {1,2,3,4,5,6,7,8,9};
+		int[] row2 = {10,11,12,13,14,15,16,17,18};
+		int[] row3 = {19,20,21,22,23,24,25,26,27};
+		int[] row4 = {28,29,30,31,32,33,34,35,36};
+		int[] row5 = {37,38,39,40,41,42,43,44,45};
+		int[] row6 = {46,47,48,49,50,51,52,53,54};
 				
-	   			for (int slot : row1) {
-	   				this.handleSlot(player, slot, chest);
-	   			}
-			
-    			if (plugin.getConfig().getInt("Rows") >= 2) {	
-    				for (int slot : row2) {
-    					this.handleSlot(player, slot, chest);
-    				}
-    			}
-    			
-    			if (plugin.getConfig().getInt("Rows") >= 3) {	
-    				for (int slot : row3) {
-    					this.handleSlot(player, slot, chest);
-    				}
-    			}
-    		
-    			if (plugin.getConfig().getInt("Rows") >= 4) {	
-    				for (int slot : row4) {
-    					this.handleSlot(player, slot, chest);
-    				}
-    			}
-   			
-    			if (plugin.getConfig().getInt("Rows") >= 5) {	
-    				for (int slot : row5) {
-    					this.handleSlot(player, slot, chest);
-    				}
-    			}
-    			
-    			if (plugin.getConfig().getInt("Rows") >= 6) {	
-    				for (int slot : row6) {
-    					this.handleSlot(player, slot, chest);
-    				}
-    			}
-    			
-    			player.openInventory(chest);
-    			e.setCancelled(true);
-    		}
+		for (int slot : row1) {
+			this.handleSlot(player, slot, chest);
 		}
+	
+		if (plugin.getConfig().getInt("Rows") >= 2) {	
+			for (int slot : row2) {
+				this.handleSlot(player, slot, chest);
+			}
+		}
+		
+		if (plugin.getConfig().getInt("Rows") >= 3) {	
+			for (int slot : row3) {
+				this.handleSlot(player, slot, chest);
+			}
+		}
+	
+		if (plugin.getConfig().getInt("Rows") >= 4) {	
+			for (int slot : row4) {
+				this.handleSlot(player, slot, chest);
+			}
+		}
+		
+		if (plugin.getConfig().getInt("Rows") >= 5) {	
+			for (int slot : row5) {
+				this.handleSlot(player, slot, chest);
+			}
+		}
+		
+		if (plugin.getConfig().getInt("Rows") >= 6) {	
+			for (int slot : row6) {
+				this.handleSlot(player, slot, chest);
+			}
+		}
+		
+		player.openInventory(chest);
     }
     
 	@EventHandler
-	public void onPlayerInteract(PlayerInteractEvent e){
-		Player player = e.getPlayer();
-		if (e.getAction() == Action.RIGHT_CLICK_AIR) { 
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+		    Player player = event.getPlayer();
 		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
-		    	makeChest(player, e);
+		    	if (player.hasPermission("compassnav.use")) {
+					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
+		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+		    		} else {
+		    			openInventory(player);
+		    			event.setCancelled(true);
+		    		}
+		    	}
 		    }
-		} else if(e.getAction() == Action.RIGHT_CLICK_BLOCK){
-			if (e.getClickedBlock().getType() == Material.SIGN_POST || e.getClickedBlock().getType() == Material.WALL_SIGN){
-				Sign s = (Sign) e.getClickedBlock().getState();
-				if (s.getLine(0).equalsIgnoreCase(plugin.getConfig().getString("SignClaim"))){
-					makeChest(player, e);
-					return;
-				}
-		    }
-			if(player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")){
-				makeChest(player, e);
-			}
 		}
 	}
 	
@@ -264,13 +254,42 @@ public class EventListener implements Listener{
 		}
 	}
 	
+	@EventHandler
+	public void onSignInteract(PlayerInteractEvent event) {
+		Block block = event.getClickedBlock();
+		if (event.getPlayer().hasPermission("compassnav.sign.use")) {
+			if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
+				if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+					Sign sign = (Sign) block.getState();
+			        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
+			        	openInventory(event.getPlayer());
+			        }
+				}
+			}
+		}
+	}
+	  
+	@EventHandler
+	public void onSignCreate(SignChangeEvent event) {
+		String line = event.getLine(0);
+		if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))))) {
+			if (event.getPlayer().hasPermission("compassnav.sign.create")) {
+				event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
+				event.getPlayer().sendMessage(plugin.prefix + "§6Succesfully created a Teleport sign!");
+			} else {
+				event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("NoPermSignName")));
+				event.getPlayer().sendMessage(plugin.prefix + "§6You do not have permission to create a Teleport sign.");
+			}
+		}
+	 }
+	
 	private ItemStack setName(ItemStack is, String name, List<String> lore){
 		ItemMeta IM = is.getItemMeta();
 		if (name != null) {
 			IM.setDisplayName(name);
 		}
 		if (lore != null) {
-			IM.setLore(new ArrayList<String>());
+			IM.setLore(new CopyOnWriteArrayList<String>());
 			IM.setLore(lore);
 		}
 		is.setItemMeta(IM);
