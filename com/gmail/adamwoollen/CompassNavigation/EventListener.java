@@ -113,6 +113,13 @@ public class EventListener implements Listener {
     }
     
     public void checkBungee(Player player, int slot) {
+    	if (sectionExists(slot, ".Command")) {
+    		if (plugin.getConfig().getString(slot + ".Command").startsWith("c:")) {
+    			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(slot + ".Command").substring(2));
+    		} else {
+    			Bukkit.dispatchCommand(player, plugin.getConfig().getString(slot + ".Command"));
+    		}
+    	}
 		if (sectionExists(slot, ".Bungee")) {
 		     Bukkit.getMessenger().registerOutgoingPluginChannel(this.plugin, "BungeeCord");
              
@@ -120,9 +127,9 @@ public class EventListener implements Listener {
 		     DataOutputStream out = new DataOutputStream(b);
 		                      
 		     try {
-		           out.writeUTF("Connect");
-		           out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
-		      } catch (Exception e) {}
+		    	 out.writeUTF("Connect");
+		         out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
+		     } catch (Exception e) {}
 		     player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
 		} else {
 			this.checkWarp(player, slot);
