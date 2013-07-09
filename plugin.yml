@@ -18,6 +18,8 @@ permissions:
     children:
       compassnav.use: true
       compassnav.admin: true
+      compassnav.sign: true
+      compassnav.perks: true
   compassnav.use:
     description: Allows usage of the compass
     default: true
@@ -83,6 +85,7 @@ permissions:
       compassnav.admin.help: true
       compassnav.admin.reload: true
       compassnav.admin.setup: true
+      compassnav.admin.sign.create: true
   compassnav.admin.help:
     description: Allows usage of /compassnav help.
     default: op
@@ -91,6 +94,9 @@ permissions:
     default: op
   compassnav.admin.setup:
     description: Allows usage of /compassnav setup.
+    default: op
+  compassnav.admin.sign.create:
+    description: Allows you to create [Teleport] signs.
     default: op
   compassnav.perks:
     description: Allows you to have several perks.
@@ -168,3 +174,15 @@ permissions:
   compassnav.perks.use.region:
     description: Allows you to use the compass in WorldGuard regions with compasses disabled.
     default: op
+  compassnav.sign:
+    description: Allows you to create and use Teleport signs.
+    default: op
+    children:
+      compassnav.sign.create: true
+      compassnav.sign.use: true
+  compassnav.sign.create:
+    description: Allows you to create Teleport signs.
+    default: op
+  compassnav.sign.use:
+    description: Allows you to use Teleport signs.
+    default: true
