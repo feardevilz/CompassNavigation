@@ -30,22 +30,23 @@ public final class CompassNavigation extends JavaPlugin {
 	// §e: Yellow
 	// §f: White
 	
+	public String prefix = "";
+	public static WorldGuardHandler worldGuardHandler;
+	public String slot = "0";
+	
 	public void onEnable() {
         this.saveDefaultConfig();
         this.getWorldGuard();
-        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-        	getLogger().info("[CN] Succesfully hooked into Vault for economy!");
-        }
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
+		
+		if (getConfig().getString("Prefix") != "") { 
+			prefix = getConfig().getString("Prefix");
+		}
 	}
-	
-	String prefix = "§2§l[§a§lCN§2§l] ";
-	String slot = "0";
-	public static WorldGuardHandler worldGuardHandler;
 	
 	public void sendHelpMessage(CommandSender p) {
 		if (p.hasPermission("compassnav.admin.help")) {
-			p.sendMessage("§6§lHELP§f | §7/compassnav help");
+			p.sendMessage("§6§lCOMPASSNAV§f | §7/compassnav help");
 			p.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 			p.sendMessage("§2/compassnav help§a - Get command help");
 			p.sendMessage("§2/compassnav reload§a - Reload CompassNavigation");
@@ -71,6 +72,7 @@ public final class CompassNavigation extends JavaPlugin {
 			p.sendMessage("§2/compassnav setup desc <description>§a - Sets item description");
 			p.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
 			p.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
+			p.sendMessage("§2/compassnav setup command <command>§a - Sets the executable command");
 			p.sendMessage("§2/compassnav setup enable§a - Enables slot");
 			p.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 		} else {
@@ -96,7 +98,6 @@ public final class CompassNavigation extends JavaPlugin {
 		if (plugin == null || !(plugin instanceof com.sk89q.worldguard.bukkit.WorldGuardPlugin)) {
 			return;
 		}
-		getLogger().info("[CN] Succesfully hooked into WorldGuard!");
 		worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
 	}
 	
@@ -109,9 +110,22 @@ public final class CompassNavigation extends JavaPlugin {
 		if (rsp == null) {
 			return null;
 		}
-		getLogger().info("[CN] Succesfully hooked into Vault!");
 		return new VaultHandler(this, rsp.getProvider());
 	}
+	
+    public boolean sectionExists(int slot, String path) {
+    	if (getConfig().contains(slot + path)) {
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public boolean simpleSectionExists(String path) {
+        if (getConfig().contains(path)) {
+       		return true;
+       	}
+       	return false;
+    }
 
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
@@ -140,6 +154,44 @@ public final class CompassNavigation extends JavaPlugin {
 						} else {
 							p.sendMessage("§4You do not have access to that command.");
 						}
+					} else if (args[0].equalsIgnoreCase("check")) {
+				    	if (p.hasPermission("compassnav.admin.check")) {
+				    		this.reloadConfig();
+				    		p.sendMessage(prefix + "§6Checking configuration for errors...");
+				    		if (this.simpleSectionExists("Item")) {
+				    			if (!getConfig().isInt("Item")) {
+				    				p.sendMessage(prefix + "§cConfig option Item should be an integer. Please manually fix.");
+				    			}
+				    		} else {
+				    			p.sendMessage(prefix + "§cConfig option Item should exist. Creating it for you.");
+				    			getConfig().set("Item", 345);
+				    		}
+				    		if (this.simpleSectionExists("GUIName")) {
+				    			if (!getConfig().isString("GUIName")) {
+				    				p.sendMessage(prefix + "§cConfig option GUIName should be a string. Please manually fix.");
+				    			}
+				    		} else {
+				    			p.sendMessage(prefix + "§cConfig option GUIName should exist. Creating it for you.");
+				    			getConfig().set("GUIName", "CompassNavigation");
+				    		}
+				    		if (this.simpleSectionExists("Rows")) {
+				    			if (!getConfig().isInt("Rows")) {
+				    				p.sendMessage(prefix + "§cConfig option Rows should be an integer. Please manually fix.");
+				    			} else {
+				    				int row = getConfig().getInt("Rows");
+				    				if (row < 1) {
+				    					p.sendMessage(prefix + "§cConfig option Rows should be greater or equal to 1. Fixing that for you.");
+				    					getConfig().set("Rows", 1);
+				    				}
+				    				if (row <= 7) {
+				    					p.sendMessage(prefix + "§cConfig option Rows should be less or equal to 6. Fixing that for you.");
+				    					getConfig().set("Rows", 6);
+				    				}
+				    			}
+				    		} else {
+				    			p.sendMessage(prefix + "§cConfig option Rows should exist. Creating it for you.");
+				    			getConfig().set("Rows", 1);
+				    		}
 					} else {
 						this.sendHelpMessage(sender);
 					}
@@ -153,7 +205,6 @@ public final class CompassNavigation extends JavaPlugin {
 						getLogger().info("/compassnav help - Get command help");
 						getLogger().info("/compassnev reload - Reload CompassNavigation");
 						getLogger().info("Oo-----------------------oOo-----------------------o");
-					}
 				}
 			} else if (args.length == 2) {
 				if (sender instanceof Player) {
@@ -214,7 +265,7 @@ public final class CompassNavigation extends JavaPlugin {
 									} else if (args[1].equalsIgnoreCase("enchant")) {
 										Boolean eState = this.getConfig().getBoolean(slot + ".Enchanted");
 										if (eState == true) {
-											this.getConfig().set(slot + ".Enchanted", false);	
+											this.getConfig().set(slot + ".Enchanted", null);	
 											p.sendMessage(prefix + "§6Removed enchant from slot " + slot + "!");
 											this.saveConfig();
 										} else {
@@ -222,6 +273,10 @@ public final class CompassNavigation extends JavaPlugin {
 											p.sendMessage(prefix + "§6Added enchant for slot " + slot + "!");
 											this.saveConfig();
 										}
+									} else if (args[1].equalsIgnoreCase("command")) {
+										this.getConfig().set(slot + ".Command", null);
+										p.sendMessage(prefix + "§6Command unset for slot " + slot + "!");
+										this.saveConfig();
 									} else {
 										this.sendSetupMessage(p, slot);
 									}
@@ -231,6 +286,7 @@ public final class CompassNavigation extends JavaPlugin {
 							} else {
 								p.sendMessage("§4You do not have access to that command.");
 							}
+					}
 				} else {
 					getLogger().info("[CN] This command can only be ran by ingame players.");
 				}
@@ -269,6 +325,10 @@ public final class CompassNavigation extends JavaPlugin {
 									} else {
 										p.sendMessage(prefix + "§6Invalid amount specified.");
 									}
+								} else if (args[1].equalsIgnoreCase("command")) {
+									this.getConfig().set(slot + ".Command", handleString(args));
+									p.sendMessage(prefix + "§6Command set for slot " + slot + "!");
+									this.saveConfig();
 								} else {
 									this.sendSetupMessage(p, slot);
 								}
