@@ -15,11 +15,12 @@
 # You can specify prices for using certain slots with the Price option.
 # You can specify item amouints with the Amount option.
 # You can specify enchanted status with the Enchanted option (true or false).
+# You can specify commands to run with the Command option (Don't include the first slash). To run a console command just write "c:" before the command itself.
 # You can set up slots ingame with /cn setup!
 # Don't forget to add items to the config!
 
 Item: 345
-GUIName: 'CompassNavigation'
+GUIName: CompassNavigation
 Rows: 1
 Prefix: '&2&l[&a&lCN&2&l]'
 SignName: '&1[Teleport]'
