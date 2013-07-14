@@ -40,7 +40,7 @@ public class ProtocolLibHandler {
 		for (ItemStack stack : stacks) {
 			if (stack != null) {
 				NbtCompound compound = (NbtCompound) NbtFactory.fromItemTag(stack);
-	        	compound.remove("AttributeModifiers");
+				compound.put(NbtFactory.ofList("AttributeModifiers"));
 			}
 		}
 	}
