@@ -30,6 +30,7 @@ permissions:
       compassnav.admin.reload: true
       compassnav.admin.setup: true
       compassnav.admin.sign: true
+      compassnav.admin.update: true
   compassnav.admin.sign:
     description: Allows you to create and use Teleport signs.
     default: op
@@ -44,6 +45,9 @@ permissions:
     default: op
     children:
       compassnav.admin.help: true
+  compassnav.admin.update:
+    description: Allows you to get messages about CompassNavigation updates
+    default: op
   compassnav.admin.setup:
     description: Allows usage of /compassnav setup.
     default: op

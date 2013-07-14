@@ -14,7 +14,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class CompassNavigation extends JavaPlugin {
+public class CompassNavigation extends JavaPlugin {
 	
 	public String prefix = "";
 	public String consolePrefix = "";
@@ -25,7 +25,8 @@ public final class CompassNavigation extends JavaPlugin {
 	public String slot = "0";
 	
 	public void onEnable() {
-        saveDefaultConfig();
+		getConfig().options().copyDefaults(true);
+		saveConfig();
         getWorldGuard();
         
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
@@ -97,7 +98,7 @@ public final class CompassNavigation extends JavaPlugin {
 			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
 			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
 			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
-			sender.sendMessage("§2/compassnav setup desc <description>§a - Sets item description");
+			sender.sendMessage("§2/compassnav setup desc [number] <description>§a - Sets item description");
 			sender.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
 			sender.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
 			sender.sendMessage("§2/compassnav setup command <command>§a - Sets the executable command");
@@ -110,15 +111,11 @@ public final class CompassNavigation extends JavaPlugin {
 	}
 	
 	public String handleString(String[] args) {
-		String result = "";
-		int length = 0;
-		for (String arg : args) {
-			if ((length != 0) || (length != 1)) {
-				result = (result + arg + " ");
-			}
-			length++;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 2; i < args.length; i++) {
+			sb.append(args[i]).append(" ");
 		}
-		return result.substring(0, result.length() - 1);
+		return sb.toString().trim();
 	}
 	
 	public boolean canUseCompassHere(Location location) {
@@ -214,11 +211,9 @@ public final class CompassNavigation extends JavaPlugin {
 									getConfig().set(slot + ".Yaw", player.getLocation().getYaw());
 									getConfig().set(slot + ".Pitch", player.getLocation().getPitch());
 									player.sendMessage(prefix + "§6Location set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("item")) {
 									getConfig().set(slot + ".Item", player.getItemInHand().getTypeId() + ":" + player.getItemInHand().getDurability());
 									player.sendMessage(prefix + "§6Item set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("enable")) {
 									if (getConfig().contains(slot + ".Enabled")) {
 										if (getConfig().getBoolean(slot + ".Enabled") == true) {
@@ -232,27 +227,21 @@ public final class CompassNavigation extends JavaPlugin {
 										player.sendMessage(prefix + "§6Enabled slot " + slot + ".");
 										getConfig().set(slot + ".Enabled", true);
 									}
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", null);
 									player.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("desc")) {
 									getConfig().set(slot + ".Desc", null);
 									player.sendMessage(prefix + "§6Description unset for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", null);
 									player.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("price")) {
 									getConfig().set(slot + ".Price", null);
 									player.sendMessage(prefix + "§6Price unset for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("amount")) {
 									getConfig().set(slot + ".Amount", null);
 									player.sendMessage(prefix + "§6Amount unset for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("enchant")) {
 									if (getConfig().contains(slot + ".Enchant")) {
 										if (getConfig().getBoolean(slot + ".Enchant") == true) {
@@ -266,14 +255,13 @@ public final class CompassNavigation extends JavaPlugin {
 										player.sendMessage(prefix + "§6Added enchant to slot " + slot + ".");
 										getConfig().set(slot + ".Enchant", true);
 									}
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("command")) {
 									getConfig().set(slot + ".Command", null);
 									player.sendMessage(prefix + "§6Command unset for slot " + slot + ".");
-									saveConfig();
 								} else {
 									sendSetupMessage(player, slot);
 								}
+								saveConfig();
 							} else {
 								player.sendMessage(prefix + "§6You haven't specified a slot to modify.");
 							}
@@ -295,34 +283,54 @@ public final class CompassNavigation extends JavaPlugin {
 								if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", handleString(args));
 									player.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("name")) {
 									getConfig().set(slot + ".Name", handleString(args));
 									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("desc")) {
-									getConfig().set(slot + ".Desc", handleString(args));
+									List<String> lore = new CopyOnWriteArrayList<String>();
+									if (args.length >= 4) {
+										String desc = handleString(args);
+										try {
+											int number = Integer.parseInt(args[2]);
+											desc = desc.split(" ", 2)[1];
+											for (String iDesc : getConfig().getStringList(slot + ".Desc")) {
+												lore.add(iDesc);
+											}
+											lore.set(number - 1, desc);
+											getConfig().set(slot + ".Desc", lore);
+										} catch (Exception e) {
+											String iDesc = handleString(args);
+											for (String iiDesc : getConfig().getStringList(slot + ".Desc")) {
+												lore.add(iiDesc);
+											}
+											lore.add(iDesc);
+											getConfig().set(slot + ".Desc", lore);
+										}
+									} else {
+										String iDesc = handleString(args);
+										for (String iiDesc : getConfig().getStringList(slot + ".Desc")) {
+											lore.add(iiDesc);
+										}
+										lore.add(iDesc);
+										getConfig().set(slot + ".Desc", lore);
+									}
 									player.sendMessage(prefix + "§6Description set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", handleString(args));
 									player.sendMessage(prefix + "§6Warp set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("price")) {
 									getConfig().set(slot + ".Price", Double.parseDouble(handleString(args)));
 									player.sendMessage(prefix + "§6Price set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("amount")) {
 									getConfig().set(slot + ".Amount", Integer.parseInt(handleString(args)));
 									player.sendMessage(prefix + "§6Amount set for slot " + slot + "!");
-									saveConfig();
 								} else if (args[1].equalsIgnoreCase("command")) {
 									getConfig().set(slot + ".Command", handleString(args));
 									player.sendMessage(prefix + "§6Command set for slot " + slot + "!");
-									saveConfig();
 								} else {
 									sendSetupMessage(player, slot);
 								}
+								saveConfig();
 							} else {
 								sendHelpMessage(player);
 							}

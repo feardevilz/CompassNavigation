@@ -107,7 +107,11 @@ public class EventListener implements Listener {
 							player.sendMessage(plugin.prefix + "§6You do not have enough money!");
 							player.closeInventory();
 						}
+					} else {
+						checkBungee(player, slot);
 					}
+				} else {
+					checkBungee(player, slot);
 				}
 			} else {
 				checkBungee(player, slot);
@@ -164,13 +168,12 @@ public class EventListener implements Listener {
     		location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
     		location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
 			player.teleport(location);
-			player.closeInventory();
-    	} else {
-    		player.closeInventory();
     	}
+    	player.closeInventory();
     }
     
     public void openInventory(Player player) {
+    	player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
 		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
 		
 		int[] row1 = {1,2,3,4,5,6,7,8,9};
@@ -215,7 +218,6 @@ public class EventListener implements Listener {
 		}
 		
 		player.openInventory(chest);
-		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     }
     
 	@EventHandler
@@ -250,7 +252,7 @@ public class EventListener implements Listener {
 								if (e.getRawSlot() == slot - 1) {
 									if (sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
-											if ((player.hasPermission("compassnav.slot." + slot) || (player.hasPermission("compassnav.slot")))) {
+											if ((player.hasPermission("compassnav.use") && !(player.hasPermission("compassnav.deny.slot." + slot)))) {
 												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 												checkMoney(player, slot);
 											} else {
@@ -326,16 +328,16 @@ public class EventListener implements Listener {
 		}
 	}
 	
-	public ItemStack setName(ItemStack is, String name, List<String> lore) {
-		ItemMeta IM = is.getItemMeta();
+	public ItemStack setName(ItemStack items, String name, List<String> lore) {
+		ItemMeta itemMeta = items.getItemMeta();
 		if (name != null) {
-			IM.setDisplayName(name);
+			itemMeta.setDisplayName(name);
 		}
 		if (lore != null) {
-			IM.setLore(lore);
+			itemMeta.setLore(lore);
 		}
-		is.setItemMeta(IM);
-		return is;
+		items.setItemMeta(itemMeta);
+		return items;
 	}
 	
 }

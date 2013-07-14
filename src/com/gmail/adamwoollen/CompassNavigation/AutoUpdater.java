@@ -42,7 +42,7 @@ public class AutoUpdater implements Listener {
   	public void onPlayerJoin(PlayerJoinEvent event) {
   		Player player = (Player) event.getPlayer();
   		
-  		if (player.hasPermission("compassnav.update")) {
+  		if (player.hasPermission("compassnav.admin.update")) {
   			checkUpdates(player);
   		}
   	}
