@@ -35,6 +35,10 @@ public final class CompassNavigation extends JavaPlugin {
             metrics.start();
         } catch (Exception e) {}
         
+        try {
+			new AutoUpdater(this);
+		} catch (Exception e) {}
+        
         eventListener = new EventListener(this);
 		getServer().getPluginManager().registerEvents(eventListener, this);
 		
