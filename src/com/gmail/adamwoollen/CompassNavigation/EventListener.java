@@ -60,7 +60,8 @@ public class EventListener implements Listener {
     				}
     			}
 				if (this.sectionExists(slot, ".Desc")) {
-					lore.add(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Desc")));
+					for (String iLore : plugin.getConfig().getStringList(slot + ".Desc")) {
+						lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
 				}
 				ItemStack stack = new ItemStack(ID, Amount, Damage);
 				if (this.sectionExists(slot, ".Enchanted")) {
@@ -273,7 +274,14 @@ public class EventListener implements Listener {
 				if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					Sign sign = (Sign) block.getState();
 			        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
-			        	openInventory(event.getPlayer());
+			        	Player player = (Player) event.getPlayer();
+						if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+			    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
+			    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+			    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+			    		} else {
+			    			openInventory(player);
+			    		}
 			        }
 				}
 			}

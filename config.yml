@@ -30,7 +30,8 @@ CommandName: 'compass'
   Enabled: true
   Item: '51'
   Name: '&6&lFire Land'
-  Desc: '&eTo the land of &6fire!'
+  Desc:
+    - '&eTo the land of &6fire!'
   World: world
   X: 0
   Y: 64
