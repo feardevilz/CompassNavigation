@@ -25,6 +25,7 @@ Rows: 1
 Prefix: '&2&l[&a&lCN&2&l]'
 SignName: '&1[Teleport]'
 NoPermSignName: '&4[Teleport]'
+CommandName: 'compass'
 1:
   Enabled: true
   Item: '51'

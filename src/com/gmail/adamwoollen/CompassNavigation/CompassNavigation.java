@@ -17,6 +17,7 @@ public final class CompassNavigation extends JavaPlugin {
 	public String consolePrefix = "";
 	public WorldGuardHandler worldGuardHandler;
 	public ProtocolLibHandler protocolLibHandler;
+	public EventListener eventListener;
 	public Metrics metrics;
 	public String slot = "0";
 	
@@ -34,7 +35,8 @@ public final class CompassNavigation extends JavaPlugin {
             metrics.start();
         } catch (Exception e) {}
         
-		getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        eventListener = new EventListener(this);
+		getServer().getPluginManager().registerEvents(eventListener, this);
 		
 		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
 			prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("Prefix") + " ");
@@ -311,6 +313,23 @@ public final class CompassNavigation extends JavaPlugin {
 					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
 				}
 			}
+    	} else if (cmd.getName().equalsIgnoreCase(getConfig().getString("CommandName"))) {
+    		if (sender instanceof Player) {
+				Player player = (Player) sender;
+    			if (player.hasPermission("compassnav.use")) {
+    				if (getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+    					player.sendMessage(prefix + "§6You can't teleport from this world!");
+    				} else if (!canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+    					player.sendMessage(prefix + "§6You can't teleport in this region!");
+    				} else {
+    					eventListener.openInventory(player);
+    				}
+    			} else {
+    				player.sendMessage("§4You do not have access to that command.");
+    			}
+    		} else {
+    			getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+    		}
     	}
     	return true;
 	}
