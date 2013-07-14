@@ -17,6 +17,7 @@
 # You can specify enchanted status with the Enchanted option (true or false).
 # You can specify commands to run with the Command option (Don't include the first slash). To run a console command just write "c:" before the command itself.
 # You can set up slots ingame with /cn setup!
+# If you are in a world that is in the Must Have Compass list, then if you lose your compass it automatically gives it back to you, according to CompassName and CompassDesc.
 # Don't forget to add items to the config!
 
 Item: 345
@@ -26,6 +27,9 @@ Prefix: '&2&l[&a&lCN&2&l]'
 SignName: '&1[Teleport]'
 NoPermSignName: '&4[Teleport]'
 CommandName: 'compass'
+CompassName: '&e&lCompass'
+CompassDesc:
+  - '&6Teleport around with this compass!'
 1:
   Enabled: true
   Item: '51'
@@ -41,3 +45,6 @@ CommandName: 'compass'
 DisabledWorlds:
   - example1
   - example2
+MustHaveCompassWorlds:
+  - example3
+  - example4

@@ -21,6 +21,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -43,7 +44,7 @@ public class EventListener implements Listener {
     }
 	
     public void handleSlot(Player player, int slot, Inventory chest) {
-    	if (this.sectionExists(slot, ".Enabled")) {
+    	if (sectionExists(slot, ".Enabled")) {
     		if (plugin.getConfig().getBoolean(slot + ".Enabled") == true) {
     			lore.clear();
     			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
@@ -54,17 +55,18 @@ public class EventListener implements Listener {
     			if (Item.split(":").length == 2) {
     				Damage = Short.parseShort(Item.split(":")[1]);
     			}
-    			if (this.sectionExists(slot, ".Amount")) {
+    			if (sectionExists(slot, ".Amount")) {
     				if ((plugin.getConfig().getInt(slot + ".Amount") <= 64) && (plugin.getConfig().getInt(slot + ".Amount") >= 1)) {
     					Amount = plugin.getConfig().getInt(slot + ".Amount");
     				}
     			}
-				if (this.sectionExists(slot, ".Desc")) {
+				if (sectionExists(slot, ".Desc")) {
 					for (String iLore : plugin.getConfig().getStringList(slot + ".Desc")) {
 						lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
+					}
 				}
 				ItemStack stack = new ItemStack(ID, Amount, Damage);
-				if (this.sectionExists(slot, ".Enchanted")) {
+				if (sectionExists(slot, ".Enchanted")) {
 					if ((plugin.getConfig().getBoolean(slot + ".Enchanted") == true) && (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib"))) {
 						stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1337);
 					}
@@ -72,7 +74,7 @@ public class EventListener implements Listener {
 				if (!player.hasPermission("compassnav.perks.free")) {
 					if (!player.hasPermission("compassnav.perks.free." + slot)) {
 						if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
-							if (this.sectionExists(slot, ".Price")) {
+							if (sectionExists(slot, ".Price")) {
 								lore.add("§2Price: §a$" + plugin.getConfig().getDouble(slot + ".Price"));
 							}
 						}
@@ -91,7 +93,7 @@ public class EventListener implements Listener {
     }
     
     public void checkMoney(Player player, int slot) {
-		if (this.sectionExists(slot, ".Price")) {
+		if (sectionExists(slot, ".Price")) {
 			Double price = plugin.getConfig().getDouble(slot + ".Price");
 			String name = player.getName();
 			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
@@ -100,7 +102,7 @@ public class EventListener implements Listener {
 						if (plugin.getVault().hasEnough(name, price)) {
 							plugin.getVault().subtract(name, price);
 							player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
-							this.checkBungee(player, slot);
+							checkBungee(player, slot);
 						} else {
 							player.sendMessage(plugin.prefix + "§6You do not have enough money!");
 							player.closeInventory();
@@ -108,10 +110,10 @@ public class EventListener implements Listener {
 					}
 				}
 			} else {
-				this.checkBungee(player, slot);
+				checkBungee(player, slot);
 			}
 		} else {
-			this.checkBungee(player, slot);
+			checkBungee(player, slot);
 		}
     }
     
@@ -124,7 +126,7 @@ public class EventListener implements Listener {
     		}
     	}
 		if (sectionExists(slot, ".Bungee")) {
-		     Bukkit.getMessenger().registerOutgoingPluginChannel(this.plugin, "BungeeCord");
+		     Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
              
 		     ByteArrayOutputStream b = new ByteArrayOutputStream();
 		     DataOutputStream out = new DataOutputStream(b);
@@ -133,9 +135,9 @@ public class EventListener implements Listener {
 		    	 out.writeUTF("Connect");
 		         out.writeUTF(plugin.getConfig().getString(slot + ".Bungee"));
 		     } catch (Exception e) {}
-		     player.sendPluginMessage(this.plugin, "BungeeCord", b.toByteArray());
+		     player.sendPluginMessage(plugin, "BungeeCord", b.toByteArray());
 		} else {
-			this.checkWarp(player, slot);
+			checkWarp(player, slot);
 		}
     }
     
@@ -145,10 +147,10 @@ public class EventListener implements Listener {
     			Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
     			player.closeInventory();
     		} else {
-    			this.checkCoords(player, slot);
+    			checkCoords(player, slot);
     		}
     	} else {
-    		this.checkCoords(player, slot);
+    		checkCoords(player, slot);
     	}
     }
     
@@ -179,36 +181,36 @@ public class EventListener implements Listener {
 		int[] row6 = {46,47,48,49,50,51,52,53,54};
 				
 		for (int slot : row1) {
-			this.handleSlot(player, slot, chest);
+			handleSlot(player, slot, chest);
 		}
 	
 		if (plugin.getConfig().getInt("Rows") >= 2) {	
 			for (int slot : row2) {
-				this.handleSlot(player, slot, chest);
+				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 3) {	
 			for (int slot : row3) {
-				this.handleSlot(player, slot, chest);
+				handleSlot(player, slot, chest);
 			}
 		}
 	
 		if (plugin.getConfig().getInt("Rows") >= 4) {	
 			for (int slot : row4) {
-				this.handleSlot(player, slot, chest);
+				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 5) {	
 			for (int slot : row5) {
-				this.handleSlot(player, slot, chest);
+				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 6) {	
 			for (int slot : row6) {
-				this.handleSlot(player, slot, chest);
+				handleSlot(player, slot, chest);
 			}
 		}
 		
@@ -236,7 +238,7 @@ public class EventListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onInventoryInteract(InventoryClickEvent e){
+	public void onInventoryInteract(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
 		if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
 			if (e.getInventory().getTitle() == plugin.getConfig().getString("GUIName")) {
@@ -246,11 +248,11 @@ public class EventListener implements Listener {
 							int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
 							for (int slot : rows) {
 								if (e.getRawSlot() == slot - 1) {
-									if (this.sectionExists(slot, ".Enabled")) {
+									if (sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 											if ((player.hasPermission("compassnav.slot." + slot) || (player.hasPermission("compassnav.slot")))) {
 												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-												this.checkMoney(player, slot);
+												checkMoney(player, slot);
 											} else {
 												player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 											}
@@ -300,9 +302,31 @@ public class EventListener implements Listener {
 				event.getPlayer().sendMessage(plugin.prefix + "§6You do not have permission to create a Teleport sign.");
 			}
 		}
-	 }
+	}
 	
-	private ItemStack setName(ItemStack is, String name, List<String> lore){
+	@EventHandler
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
+			lore.clear();
+			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("CompassName"));
+			String Item = plugin.getConfig().getString("Item");
+			short Damage = 0;
+			int ID = Integer.parseInt(Item.split(":")[0]);
+			if (Item.split(":").length == 2) {
+				Damage = Short.parseShort(Item.split(":")[1]);
+			}
+			for (String iLore : plugin.getConfig().getStringList("CompassDesc")) {
+				lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
+			}
+			ItemStack item = setName(new ItemStack(ID, 1, Damage), Name, lore);
+			if (!player.getInventory().contains(item)) {
+				player.getInventory().addItem(item);
+			}
+		}
+	}
+	
+	public ItemStack setName(ItemStack is, String name, List<String> lore) {
 		ItemMeta IM = is.getItemMeta();
 		if (name != null) {
 			IM.setDisplayName(name);
