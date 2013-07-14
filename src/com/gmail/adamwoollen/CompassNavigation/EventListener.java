@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -272,38 +271,42 @@ public class EventListener implements Listener {
 	
 	@EventHandler
 	public void onSignInteract(PlayerInteractEvent event) {
-		Block block = event.getClickedBlock();
-		if (event.getPlayer().hasPermission("compassnav.admin.sign.use")) {
-			if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
-				if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-					Sign sign = (Sign) block.getState();
-			        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
-			        	Player player = (Player) event.getPlayer();
-						if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-			    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
-			    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-			    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
-			    		} else {
-			    			openInventory(player);
-			    		}
-			        }
+		try {
+			Block block = event.getClickedBlock();
+			if (event.getPlayer().hasPermission("compassnav.admin.sign.use")) {
+				if (block.getTypeId() == 63 || block.getTypeId() == 68) {
+					if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+						Sign sign = (Sign) block.getState();
+				        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
+				        	Player player = (Player) event.getPlayer();
+							if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+				    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
+				    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+				    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+				    		} else {
+				    			openInventory(player);
+				    		}
+				        }
+					}
 				}
 			}
-		}
+		} catch (Exception e) {}
 	}
 	  
 	@EventHandler
 	public void onSignCreate(SignChangeEvent event) {
-		String line = event.getLine(0);
-		if (line == ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))) || (line == ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
-			if (event.getPlayer().hasPermission("compassnav.admin.sign.create")) {
-				event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
-				event.getPlayer().sendMessage(plugin.prefix + "§6Succesfully created a Teleport sign!");
-			} else {
-				event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("NoPermSignName")));
-				event.getPlayer().sendMessage(plugin.prefix + "§6You do not have permission to create a Teleport sign.");
+		try {
+			String line = event.getLine(0);
+			if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))))) {
+				if (event.getPlayer().hasPermission("compassnav.admin.sign.create")) {
+					event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
+					event.getPlayer().sendMessage(plugin.prefix + "§6Succesfully created a Teleport sign!");
+				} else {
+					event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("NoPermSignName")));
+					event.getPlayer().sendMessage(plugin.prefix + "§6You do not have permission to create a Teleport sign.");
+				}
 			}
-		}
+		} catch (Exception e) {}
 	}
 	
 	@EventHandler
