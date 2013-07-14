@@ -79,9 +79,7 @@ public class EventListener implements Listener {
 						}
 					}
 				}
-				if (player.hasPermission("compassnav.slot")) {
-					chest.setItem(slot - 1, setName(stack, Name, lore));
-				} else if (player.hasPermission("compassnav.slot." + slot)) {
+				if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
 					chest.setItem(slot - 1, setName(stack, Name, lore));
 				} else {
 					lore.add("§4No permission");
@@ -251,7 +249,7 @@ public class EventListener implements Listener {
 								if (e.getRawSlot() == slot - 1) {
 									if (sectionExists(slot, ".Enabled")) {
 										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
-											if ((player.hasPermission("compassnav.use") && !(player.hasPermission("compassnav.deny.slot." + slot)))) {
+											if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
 												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 												checkMoney(player, slot);
 											} else {
