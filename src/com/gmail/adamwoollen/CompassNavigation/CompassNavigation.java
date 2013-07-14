@@ -2,6 +2,7 @@ package com.gmail.adamwoollen.CompassNavigation;
 
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,351 +12,306 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CompassNavigation extends JavaPlugin {
-
-    // CHAT COLORS			FORMATTING CODES
-	// Â§0: Black			Â§k: Obfuscated
-	// Â§1: Dark Blue		Â§l: Bold
-	// Â§2: Dark Green		Â§m: Strikethrough
-	// Â§3: Dark Aqua		Â§n: Underline
-	// Â§4: Dark Red			Â§o: Italic
-	// Â§5: Purple			Â§r: Reset
-	// Â§6: Gold (Orange)
-	// Â§7: Gray
-	// Â§8: Dark Gray
-	// Â§9: Blue
-	// Â§a: Green
-	// Â§b: Aqua
-	// Â§c: Red
-	// Â§d: Light Purple (Pink)
-	// Â§e: Yellow
-	// Â§f: White
 	
 	public String prefix = "";
-	public static WorldGuardHandler worldGuardHandler;
+	public String consolePrefix = "";
+	public WorldGuardHandler worldGuardHandler;
+	public ProtocolLibHandler protocolLibHandler;
+	public Metrics metrics;
 	public String slot = "0";
 	
 	public void onEnable() {
-        this.saveDefaultConfig();
-        this.getWorldGuard();
+        saveDefaultConfig();
+        getWorldGuard();
+        
+        if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+        	protocolLibHandler = new ProtocolLibHandler(this);
+        	protocolLibHandler.initializeListener();
+        }
+        
+        try {
+            metrics = new Metrics(this);
+            metrics.start();
+        } catch (Exception e) {}
+        
 		getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		
-		if (getConfig().getString("Prefix") != "") { 
-			prefix = getConfig().getString("Prefix");
+		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
+			prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("Prefix") + " ");
+			consolePrefix = ChatColor.stripColor(prefix);
 		}
 	}
 	
-	public void sendHelpMessage(CommandSender p) {
-		if (p.hasPermission("compassnav.admin.help")) {
-			p.sendMessage("Â§6Â§lCOMPASSNAVÂ§f | Â§7/compassnav help");
-			p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
-			p.sendMessage("Â§2/compassnav helpÂ§a - Get command help");
-			p.sendMessage("Â§2/compassnav reloadÂ§a - Reload CompassNavigation");
-			p.sendMessage("Â§2/compassnav setupÂ§a - Set up compass inventory slots");
-			p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
+	public void sendHelpMessage(CommandSender sender) {
+		if (sender instanceof Player) {
+			sender.sendMessage("§6§lCOMPASSNAV§f | §7/compassnav help");
+			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+			sender.sendMessage("§2/compassnav help§a - Get command help");
+			sender.sendMessage("§2/compassnav reload§a - Reload the plugin");
+			sender.sendMessage("§2/compassnav setup§a - Set up compass inventory slots");
+			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 		} else {
-			p.sendMessage("Â§4You do not have access to that command.");
+			getLogger().info("COMPASSNAV | /compassnav help");
+			getLogger().info("Oo-----------------------oOo-----------------------oO");
+			getLogger().info("/compassnav help - Get command help");
+			getLogger().info("/compassnav reload - Reload the plugin");
+			getLogger().info("/compassnav setup - Set up compass inventory slots");
+			getLogger().info("Oo-----------------------oOo-----------------------oO");
 		}
 	}
 		
-	public void sendSetupMessage(CommandSender p, String slot) {
-		if (p.hasPermission("compassnav.admin.setup")) {
-			p.sendMessage("Â§6Â§lSETUPÂ§f | Â§7/compassnav setup");
-			p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
+	public void sendSetupMessage(CommandSender sender, String slot) {
+		if (sender.hasPermission("compassnav.admin.setup")) {
+			sender.sendMessage("§6§lSETUP§f | §7/compassnav setup");
+			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 			if (!slot.equals("0")) {
-				p.sendMessage("Â§aYou are now setting up slot " + slot + ".");
+				sender.sendMessage("§aYou are now setting up slot " + slot + ".");
 			}
-			p.sendMessage("Â§2/compassnav setup locÂ§a - Sets location");
-			p.sendMessage("Â§2/compassnav setup bungee <server>Â§a - Sets BungeeCord server");
-			p.sendMessage("Â§2/compassnav setup warp <warp>Â§a - Sets Essentials warp");
-			p.sendMessage("Â§2/compassnav setup itemÂ§a - Sets item from hand");
-			p.sendMessage("Â§2/compassnav setup name <name>Â§a - Sets item name");
-			p.sendMessage("Â§2/compassnav setup desc <description>Â§a - Sets item description");
-			p.sendMessage("Â§2/compassnav setup price <price>Â§a - Sets the price of using the item");
-			p.sendMessage("Â§2/compassnav setup amount <amount>Â§a - Sets item amount");
-			p.sendMessage("Â§2/compassnav setup command <command>Â§a - Sets the executable command");
-			p.sendMessage("Â§2/compassnav setup enableÂ§a - Enables slot");
-			p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
+			sender.sendMessage("§2/compassnav setup loc§a - Sets location");
+			sender.sendMessage("§2/compassnav setup bungee <server>§a - Sets BungeeCord server");
+			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
+			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
+			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
+			sender.sendMessage("§2/compassnav setup desc <description>§a - Sets item description");
+			sender.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
+			sender.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
+			sender.sendMessage("§2/compassnav setup command <command>§a - Sets the executable command");
+			sender.sendMessage("§2/compassnav setup enchant§a - Toggles enchanted status");
+			sender.sendMessage("§2/compassnav setup enable§a - Enables slot");
+			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
 		} else {
-			p.sendMessage("Â§4You do not have access to that command.");
+			sender.sendMessage("§4You do not have access to that command.");
 		}
 	}
 	
 	public String handleString(String[] args) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 2; i < args.length; i++) {
-			sb.append(args[i]).append(" ");
+		String result = "";
+		int length = 0;
+		for (String arg : args) {
+			if ((length != 0) || (length != 1)) {
+				result = (result + arg + " ");
+			}
+			length++;
 		}
-		String nameS = sb.toString().trim();
-		return nameS;
+		return result.substring(0, result.length() - 1);
 	}
 	
-	public boolean canUseCompassHere(Location loc) {
-		return (worldGuardHandler == null) ? true : worldGuardHandler.canUseCompassHere(loc);
+	public boolean canUseCompassHere(Location location) {
+		return (worldGuardHandler == null) ? true : worldGuardHandler.canUseCompassHere(location);
 	}
 	
 	public void getWorldGuard() {
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-		if (plugin == null || !(plugin instanceof com.sk89q.worldguard.bukkit.WorldGuardPlugin)) {
-			return;
+		if (plugin != null) {
+			worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
 		}
-		worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
 	}
 	
-	VaultHandler getVault() {
+	public VaultHandler getVault() {
 		Plugin plugin = getServer().getPluginManager().getPlugin("Vault");
-		if (plugin == null || !(plugin instanceof net.milkbowl.vault.Vault)) {
-			return null;
+		if (plugin != null) {
+			RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+			if (rsp != null) {
+				return new VaultHandler(this, rsp.getProvider());
+			}
 		}
-		RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
-		if (rsp == null) {
-			return null;
-		}
-		return new VaultHandler(this, rsp.getProvider());
+		return null;
 	}
 	
-    public boolean sectionExists(int slot, String path) {
+    public boolean sectionExists(String slot, String path) {
     	if (getConfig().contains(slot + path)) {
     		return true;
     	}
     	return false;
     }
     
-    public boolean simpleSectionExists(String path) {
-        if (getConfig().contains(path)) {
-       		return true;
-       	}
-       	return false;
-    }
-
-
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
-    	if(cmd.getName().equalsIgnoreCase("compassnav") || (cmd.getName().equalsIgnoreCase("cn"))) {
-    		if (args.length == 0) {
-    			if (sender instanceof Player) {
-    				this.sendHelpMessage(sender);
-    			}
-    		} else if (args.length == 1) {
-    			if (sender instanceof Player) {
-    			    Player p = (Player) sender;
-				    if (args[0].equalsIgnoreCase("reload")) {
-				    	if (p.hasPermission("compassnav.admin.reload")) {
-					    	this.reloadConfig();
-					    	p.sendMessage(prefix + "Â§6Compass Navigation reloaded!");;
-				    	} else {
-				    		p.sendMessage("Â§4You do not have access to that command.");
-				    	}
-				    } else if (args[0].equalsIgnoreCase("setup")) {
-						if (p.hasPermission("compassnav.admin.setup")) {
-							p.sendMessage("Â§6Â§lSETUPÂ§f | Â§7/compassnav setup");
-							p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
-							p.sendMessage("Â§aPlease specify a slot number.");
-							p.sendMessage("Â§2Usage:Â§a /compassnav setup <1>");
-							p.sendMessage("Â§6Oo-----------------------oOo-----------------------oO");
-						} else {
-							p.sendMessage("Â§4You do not have access to that command.");
-						}
-					} else if (args[0].equalsIgnoreCase("check")) {
-				    	if (p.hasPermission("compassnav.admin.check")) {
-				    		this.reloadConfig();
-				    		p.sendMessage(prefix + "Â§6Checking configuration for errors...");
-				    		if (this.simpleSectionExists("Item")) {
-				    			if (!getConfig().isInt("Item")) {
-				    				p.sendMessage(prefix + "Â§cConfig option Item should be an integer. Please manually fix.");
-				    			}
-				    		} else {
-				    			p.sendMessage(prefix + "Â§cConfig option Item should exist. Creating it for you.");
-				    			getConfig().set("Item", 345);
-				    		}
-				    		if (this.simpleSectionExists("GUIName")) {
-				    			if (!getConfig().isString("GUIName")) {
-				    				p.sendMessage(prefix + "Â§cConfig option GUIName should be a string. Please manually fix.");
-				    			}
-				    		} else {
-				    			p.sendMessage(prefix + "Â§cConfig option GUIName should exist. Creating it for you.");
-				    			getConfig().set("GUIName", "CompassNavigation");
-				    		}
-				    		if (this.simpleSectionExists("Rows")) {
-				    			if (!getConfig().isInt("Rows")) {
-				    				p.sendMessage(prefix + "Â§cConfig option Rows should be an integer. Please manually fix.");
-				    			} else {
-				    				int row = getConfig().getInt("Rows");
-				    				if (row < 1) {
-				    					p.sendMessage(prefix + "Â§cConfig option Rows should be greater or equal to 1. Fixing that for you.");
-				    					getConfig().set("Rows", 1);
-				    				}
-				    				if (row <= 7) {
-				    					p.sendMessage(prefix + "Â§cConfig option Rows should be less or equal to 6. Fixing that for you.");
-				    					getConfig().set("Rows", 6);
-				    				}
-				    			}
-				    		} else {
-				    			p.sendMessage(prefix + "Â§cConfig option Rows should exist. Creating it for you.");
-				    			getConfig().set("Rows", 1);
-				    		}
-					} else {
-						this.sendHelpMessage(sender);
-					}
-			    } else {
-					if (args[0].equalsIgnoreCase("reload")) {
-						this.reloadConfig();
-						getLogger().info("[CN] Compass Navigation reloaded!");
-					} else {
-						getLogger().info("HELP | /compassnav help");
-						getLogger().info("Oo-----------------------oOo-----------------------o");
-						getLogger().info("/compassnav help - Get command help");
-						getLogger().info("/compassnev reload - Reload CompassNavigation");
-						getLogger().info("Oo-----------------------oOo-----------------------o");
-				}
-			} else if (args.length == 2) {
-				if (sender instanceof Player) {
-					Player p = (Player) sender;
-					if (args[0].equalsIgnoreCase("setup")) {
-							if (isInteger(args[1])) {
-								if (Integer.parseInt(args[1]) <= 54) {
-									slot = args[1];
-									this.sendSetupMessage(p, slot);
-								}
-							}
-							if (p.hasPermission("compassnav.admin.setup")) {
-								if (!slot.equals("0")) {
-									if (args[1].equalsIgnoreCase("loc")) {
-										this.getConfig().set(slot + ".World", p.getWorld().getName());
-										this.getConfig().set(slot + ".X", p.getLocation().getX());
-										this.getConfig().set(slot + ".Y", p.getLocation().getY());
-										this.getConfig().set(slot + ".Z", p.getLocation().getZ());
-										this.getConfig().set(slot + ".Yaw", p.getLocation().getYaw());
-										this.getConfig().set(slot + ".Pitch", p.getLocation().getPitch());
-										p.sendMessage(prefix + "Â§6Location set for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("item")) {
-										String ID = Integer.toString(p.getItemInHand().getTypeId());
-										String Damage = Short.toString(p.getItemInHand().getDurability());
-										if (Damage != "0") {
-											this.getConfig().set(slot + ".Item", ID + ":" + Damage);
-										} else {
-											this.getConfig().set(slot + ".Item", ID);
-										}
-										p.sendMessage(prefix + "Â§6Item set for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("enable")){
-										this.getConfig().set(slot + ".Enabled", true);
-										this.saveConfig();
-										p.sendMessage(prefix + "Â§6Enabled slot " + slot + ".");
-										slot = "0";
-									} else if (args[1].equalsIgnoreCase("bungee")) {
-										this.getConfig().set(slot + ".Bungee", null);
-										p.sendMessage(prefix + "Â§6Bungee unset for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("desc")) {
-										this.getConfig().set(slot + ".Desc", null);
-										p.sendMessage(prefix + "Â§6Description unset for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("warp")) {
-										this.getConfig().set(slot + ".Warp", null);
-										p.sendMessage(prefix + "Â§6Warp unset for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("price")) {
-										this.getConfig().set(slot + ".Price", null);
-										p.sendMessage(prefix + "Â§6Price unset for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("amount")) {
-										this.getConfig().set(slot + ".Amount", null);
-										p.sendMessage(prefix + "Â§6Amount unset for slot " + slot + "!");
-										this.saveConfig();
-									} else if (args[1].equalsIgnoreCase("enchant")) {
-										Boolean eState = this.getConfig().getBoolean(slot + ".Enchanted");
-										if (eState == true) {
-											this.getConfig().set(slot + ".Enchanted", null);	
-											p.sendMessage(prefix + "Â§6Removed enchant from slot " + slot + "!");
-											this.saveConfig();
-										} else {
-											this.getConfig().set(slot + ".Enchanted", true);
-											p.sendMessage(prefix + "Â§6Added enchant for slot " + slot + "!");
-											this.saveConfig();
-										}
-									} else if (args[1].equalsIgnoreCase("command")) {
-										this.getConfig().set(slot + ".Command", null);
-										p.sendMessage(prefix + "Â§6Command unset for slot " + slot + "!");
-										this.saveConfig();
-									} else {
-										this.sendSetupMessage(p, slot);
-									}
-								} else {
-									p.sendMessage(prefix + "Â§6You haven't specified a slot to modify.");
-								}
-							} else {
-								p.sendMessage("Â§4You do not have access to that command.");
-							}
-					}
-				} else {
-					getLogger().info("[CN] This command can only be ran by ingame players.");
-				}
-			} else if (args.length >= 3) {
-				if (sender instanceof Player) {
-					Player p = (Player) sender;
-					if (p.hasPermission("compassnav.admin.setup")) {
-						if (!slot.equals("0")) {
-							if (args[0].equalsIgnoreCase("setup")) {
-								if (args[1].equalsIgnoreCase("bungee")) {
-									this.getConfig().set(slot + ".Bungee", args[2]);
-									p.sendMessage(prefix + "Â§6Bungee set for slot " + slot + "!");
-									this.saveConfig();
-								} else if (args[1].equalsIgnoreCase("name")) {
-									this.getConfig().set(slot + ".Name", handleString(args));
-									p.sendMessage(prefix + "Â§6Name set for slot " + slot + "!");
-									this.saveConfig();
-								} else if (args[1].equalsIgnoreCase("desc")) {
-									this.getConfig().set(slot + ".Desc", handleString(args));
-									p.sendMessage(prefix + "Â§6Description set for slot " + slot + "!");
-									this.saveConfig();
-								} else if (args[1].equalsIgnoreCase("warp")) {
-									this.getConfig().set(slot + ".Warp", handleString(args));
-									p.sendMessage(prefix + "Â§6Warp set for slot " + slot + "!");
-									this.saveConfig();
-								} else if (args[1].equalsIgnoreCase("price")) {
-									this.getConfig().set(slot + ".Price", Double.parseDouble(args[2]));
-									p.sendMessage(prefix + "Â§6Price set for slot " + slot + "!");
-									this.saveConfig();
-								} else if (args[1].equalsIgnoreCase("amount")) {
-									int iAmount = Integer.parseInt(args[2]);
-									if ((iAmount >= 1) && (iAmount <= 64)) {
-										this.getConfig().set(slot + ".Amount", iAmount);
-										p.sendMessage(prefix + "Â§6Amount set for slot " + slot + "!");
-										this.saveConfig();
-									} else {
-										p.sendMessage(prefix + "Â§6Invalid amount specified.");
-									}
-								} else if (args[1].equalsIgnoreCase("command")) {
-									this.getConfig().set(slot + ".Command", handleString(args));
-									p.sendMessage(prefix + "Â§6Command set for slot " + slot + "!");
-									this.saveConfig();
-								} else {
-									this.sendSetupMessage(p, slot);
-								}
-							} else {
-								this.sendHelpMessage(p);
-							}
-						} else {
-							p.sendMessage(prefix + "Â§6You haven't specified a slot to modify.");
-						}
-					} else {
-						p.sendMessage("Â§4You do not have access to that command.");
-					}
-				} else {
-					getLogger().info("[CN] This command can only be ran by ingame players.");
-				}
-			}
-    	}
-    	}
-    	return true;
-	}
-
-	public boolean isInteger(String s) {
+	public boolean isInteger(String str) {
 	    try {
-	        Integer.parseInt(s);
-	    } catch(NumberFormatException e) {
+	        Integer.parseInt(str);
+	    } catch (Exception e) {
 	        return false;
 	    }
 		return true;
+	}
+
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    	if ((cmd.getName().equalsIgnoreCase("compassnav")) || (cmd.getName().equalsIgnoreCase("cn")) || (cmd.getName().equalsIgnoreCase("compassnavigation"))) {
+    		if (args.length == 0) {
+    			sendHelpMessage(sender);
+    		} else if (args.length == 1) {
+    			if (args[0].equalsIgnoreCase("reload")) {
+    				if (sender instanceof Player) {
+    					Player player = (Player) sender;
+    					if (player.hasPermission("compassnav.admin.reload")) {
+    						reloadConfig();
+    						player.sendMessage(prefix + "§6CompassNavigation reloaded!");;
+				    	} else {
+				    		player.sendMessage("§4You do not have access to that command.");
+				    	}
+    				} else {
+    					reloadConfig();
+    					getLogger().info(consolePrefix + "CompassNavigation reloaded!");
+    				}
+    			} else if (args[0].equalsIgnoreCase("setup")) {
+    				if (sender instanceof Player) {
+    					Player player = (Player) sender;
+    					if (player.hasPermission("compassnav.admin.setup")) {
+    						player.sendMessage("§6§lSETUP§f | §7/compassnav setup");
+    						player.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+							player.sendMessage("§aPlease specify a slot number.");
+							player.sendMessage("§2Usage:§a /compassnav setup <1>");
+							player.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+    					} else {
+    						player.sendMessage("§4You do not have access to that command.");
+    					}
+    				} else {
+    					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+    				}
+    			} else {
+    				sendHelpMessage(sender);
+    			}
+			} else if (args.length == 2) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (args[0].equalsIgnoreCase("setup")) {
+						if (player.hasPermission("compassnav.admin.setup")) {
+							if (isInteger(args[1])) {
+								if (Integer.parseInt(args[1]) <= 54) {
+									slot = args[1];
+									sendSetupMessage(player, slot);
+								}
+							} else if (!slot.equals("0")) {
+								if (args[1].equalsIgnoreCase("loc")) {
+									getConfig().set(slot + ".World", player.getWorld().getName());
+									getConfig().set(slot + ".X", player.getLocation().getX());
+									getConfig().set(slot + ".Y", player.getLocation().getY());
+									getConfig().set(slot + ".Z", player.getLocation().getZ());
+									getConfig().set(slot + ".Yaw", player.getLocation().getYaw());
+									getConfig().set(slot + ".Pitch", player.getLocation().getPitch());
+									player.sendMessage(prefix + "§6Location set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("item")) {
+									getConfig().set(slot + ".Item", player.getItemInHand().getTypeId() + ":" + player.getItemInHand().getDurability());
+									player.sendMessage(prefix + "§6Item set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("enable")) {
+									if (getConfig().contains(slot + ".Enabled")) {
+										if (getConfig().getBoolean(slot + ".Enabled") == true) {
+											player.sendMessage(prefix + "§6Disabled slot " + slot + ".");
+											getConfig().set(slot + ".Enabled", false);
+										} else {
+											player.sendMessage(prefix + "§6Enabled slot " + slot + ".");
+											getConfig().set(slot + ".Enabled", true);
+										}
+									} else {
+										player.sendMessage(prefix + "§6Enabled slot " + slot + ".");
+										getConfig().set(slot + ".Enabled", true);
+									}
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("bungee")) {
+									getConfig().set(slot + ".Bungee", null);
+									player.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("desc")) {
+									getConfig().set(slot + ".Desc", null);
+									player.sendMessage(prefix + "§6Description unset for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("warp")) {
+									getConfig().set(slot + ".Warp", null);
+									player.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("price")) {
+									getConfig().set(slot + ".Price", null);
+									player.sendMessage(prefix + "§6Price unset for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("amount")) {
+									getConfig().set(slot + ".Amount", null);
+									player.sendMessage(prefix + "§6Amount unset for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("enchant")) {
+									if (getConfig().contains(slot + ".Enchant")) {
+										if (getConfig().getBoolean(slot + ".Enchant") == true) {
+											player.sendMessage(prefix + "§6Removed enchant from slot " + slot + ".");
+											getConfig().set(slot + ".Enchant", null);
+										} else {
+											player.sendMessage(prefix + "§6Added enchant to slot " + slot + ".");
+											getConfig().set(slot + ".Enchant", true);
+										}
+									} else {
+										player.sendMessage(prefix + "§6Added enchant to slot " + slot + ".");
+										getConfig().set(slot + ".Enchant", true);
+									}
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("command")) {
+									getConfig().set(slot + ".Command", null);
+									player.sendMessage(prefix + "§6Command unset for slot " + slot + ".");
+									saveConfig();
+								} else {
+									sendSetupMessage(player, slot);
+								}
+							} else {
+								player.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+							}
+						} else {
+							player.sendMessage("§4You do not have access to that command.");
+						}
+					} else {
+						sendHelpMessage(player);
+					}
+				} else {
+					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+				}
+			} else if (args.length >= 3) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (player.hasPermission("compassnav.admin.setup")) {
+						if (!slot.equals("0")) {
+							if (args[0].equalsIgnoreCase("setup")) {
+								if (args[1].equalsIgnoreCase("bungee")) {
+									getConfig().set(slot + ".Bungee", handleString(args));
+									player.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("name")) {
+									getConfig().set(slot + ".Name", handleString(args));
+									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("desc")) {
+									getConfig().set(slot + ".Desc", handleString(args));
+									player.sendMessage(prefix + "§6Description set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("warp")) {
+									getConfig().set(slot + ".Warp", handleString(args));
+									player.sendMessage(prefix + "§6Warp set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("price")) {
+									getConfig().set(slot + ".Price", Double.parseDouble(handleString(args)));
+									player.sendMessage(prefix + "§6Price set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("amount")) {
+									getConfig().set(slot + ".Amount", Integer.parseInt(handleString(args)));
+									player.sendMessage(prefix + "§6Amount set for slot " + slot + "!");
+									saveConfig();
+								} else if (args[1].equalsIgnoreCase("command")) {
+									getConfig().set(slot + ".Command", handleString(args));
+									player.sendMessage(prefix + "§6Command set for slot " + slot + "!");
+									saveConfig();
+								} else {
+									sendSetupMessage(player, slot);
+								}
+							} else {
+								sendHelpMessage(player);
+							}
+						} else {
+							player.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+						}
+					} else {
+						player.sendMessage("§4You do not have access to that command.");
+					}
+				} else {
+					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+				}
+			}
+    	}
+    	return true;
 	}
 }

@@ -17,26 +17,27 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 
+@SuppressWarnings("all")
 public class WorldGuardHandler {
 
-  public static class CompassFlag extends StateFlag {
+	public static class CompassFlag extends StateFlag {
 		public static CompassFlag flag = new CompassFlag();
 
 		public CompassFlag() {
 			super("compass", true);
 		}
-
-		private static List<Flag> elements() {
+		
+		public static List<Flag> elements() {
 			List<Flag> elements = new ArrayList(Arrays.asList(DefaultFlag.getFlags()));
 			elements.add(flag);
 			return elements;
 		}
 
-		static boolean setAllowsFlag(ApplicableRegionSet set) {
+		public static boolean setAllowsFlag(ApplicableRegionSet set) {
 			return set.allows(flag);
 		}
 
-		static void injectHack() {
+		public static void injectHack() {
 			try {
 				Field field = DefaultFlag.class.getDeclaredField("flagsList");
 
@@ -60,27 +61,23 @@ public class WorldGuardHandler {
 				GlobalRegionManager globalRegionManager = (GlobalRegionManager) grm.get(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard"));
 
 				globalRegionManager.preload();
-
-			} catch (Exception e) {
-				Bukkit.getLogger().severe("An error has happened. Please include this in your error reports:");
-				e.printStackTrace();
-			}
+			} catch (Exception e) {}
 		}
 	}
+	
+	public WorldGuardPlugin worldGuard;
 
-	private WorldGuardPlugin worldGuard;
-
-	WorldGuardHandler(WorldGuardPlugin worldGuard) {
+	public WorldGuardHandler(WorldGuardPlugin worldGuard) {
 		this.worldGuard = worldGuard;
 		CompassFlag.injectHack();
 	}
 
-	boolean canUseCompassHere(Location location) {
+	public boolean canUseCompassHere(Location location) {
 		ApplicableRegionSet regions = getApplicableRegions(location);
 		return CompassFlag.setAllowsFlag(regions);
 	}
 
-	private ApplicableRegionSet getApplicableRegions(Location location) {
+	public ApplicableRegionSet getApplicableRegions(Location location) {
 		return worldGuard.getGlobalRegionManager().get(location.getWorld()).getApplicableRegions(BukkitUtil.toVector(location));
 	}
 }

@@ -1,14 +1,14 @@
 name: CompassNavigation
 version: 1.6
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
-website: http://dev.bukkit.org/bukkit-mods/compass-navigation/
+website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
-authors: [Adzwoolly, xMRKIRO]
-softdepend: [Essentials, WorldGuard, Vault]
+authors: [xMRKIRO, Adzwooly]
+softdepend: [Essentials, WorldEdit, WorldGuard, Vault, ProtocolLib]
 commands:
   compassnav:
-    description: Allows you to reload configuration and set up the plugin ingame.
-    aliases: cn
+    description: Allows you to reload configuration and set up CompassNavigation ingame.
+    aliases: [cn, compassnavigation]
     permission: compassnav.admin.help
     usage: "Usage: /compassnav help"
 permissions:
@@ -22,61 +22,6 @@ permissions:
   compassnav.use:
     description: Allows usage of the compass
     default: true
-    children:
-      compassnav.slot.1: true
-      compassnav.slot.2: true
-      compassnav.slot.3: true
-      compassnav.slot.4: true
-      compassnav.slot.5: true
-      compassnav.slot.6: true
-      compassnav.slot.7: true
-      compassnav.slot.8: true
-      compassnav.slot.9: true
-      compassnav.slot.10: true
-      compassnav.slot.11: true
-      compassnav.slot.12: true
-      compassnav.slot.13: true
-      compassnav.slot.14: true
-      compassnav.slot.15: true
-      compassnav.slot.16: true
-      compassnav.slot.17: true
-      compassnav.slot.18: true
-      compassnav.slot.19: true
-      compassnav.slot.20: true
-      compassnav.slot.21: true
-      compassnav.slot.22: true
-      compassnav.slot.23: true
-      compassnav.slot.24: true
-      compassnav.slot.25: true
-      compassnav.slot.26: true
-      compassnav.slot.27: true
-      compassnav.slot.28: true
-      compassnav.slot.29: true
-      compassnav.slot.30: true
-      compassnav.slot.31: true
-      compassnav.slot.32: true
-      compassnav.slot.33: true
-      compassnav.slot.34: true
-      compassnav.slot.35: true
-      compassnav.slot.36: true
-      compassnav.slot.37: true
-      compassnav.slot.38: true
-      compassnav.slot.39: true
-      compassnav.slot.40: true
-      compassnav.slot.41: true
-      compassnav.slot.42: true
-      compassnav.slot.43: true
-      compassnav.slot.44: true
-      compassnav.slot.45: true
-      compassnav.slot.46: true
-      compassnav.slot.47: true
-      compassnav.slot.48: true
-      compassnav.slot.49: true
-      compassnav.slot.50: true
-      compassnav.slot.51: true
-      compassnav.slot.52: true
-      compassnav.slot.53: true
-      compassnav.slot.54: true
   compassnav.admin:
     description: Allows usage of CompassNavigation admin commands.
     default: op
@@ -85,15 +30,29 @@ permissions:
       compassnav.admin.reload: true
       compassnav.admin.setup: true
       compassnav.admin.sign: true
+  compassnav.admin.sign:
+    description: Allows you to create and use Teleport signs.
+    default: op
+    children:
+      compassnav.sign.create: true
+      compassnav.sign.use: true
   compassnav.admin.help:
     description: Allows usage of /compassnav help.
     default: op
   compassnav.admin.reload:
     description: Allows usage of /compassnav reload.
     default: op
+    children:
+      compassnav.admin.help: true
   compassnav.admin.setup:
     description: Allows usage of /compassnav setup.
     default: op
+  compassnav.sign.create:
+    description: Allows you to create Teleport signs.
+    default: op
+  compassnav.sign.use:
+    description: Allows you to use Teleport signs.
+    default: true
   compassnav.perks:
     description: Allows you to have several perks.
     default: op
@@ -103,61 +62,6 @@ permissions:
   compassnav.perks.free:
     description: Allows you to bypass the economy and use slots for free.
     default: op
-    children:
-      compassnav.perks.free.1: true
-      compassnav.perks.free.2: true
-      compassnav.perks.free.3: true
-      compassnav.perks.free.4: true
-      compassnav.perks.free.5: true
-      compassnav.perks.free.6: true
-      compassnav.perks.free.7: true
-      compassnav.perks.free.8: true
-      compassnav.perks.free.9: true
-      compassnav.perks.free.10: true
-      compassnav.perks.free.11: true
-      compassnav.perks.free.12: true
-      compassnav.perks.free.13: true
-      compassnav.perks.free.14: true
-      compassnav.perks.free.15: true
-      compassnav.perks.free.16: true
-      compassnav.perks.free.17: true
-      compassnav.perks.free.18: true
-      compassnav.perks.free.19: true
-      compassnav.perks.free.20: true
-      compassnav.perks.free.21: true
-      compassnav.perks.free.22: true
-      compassnav.perks.free.23: true
-      compassnav.perks.free.24: true
-      compassnav.perks.free.25: true
-      compassnav.perks.free.26: true
-      compassnav.perks.free.27: true
-      compassnav.perks.free.28: true
-      compassnav.perks.free.29: true
-      compassnav.perks.free.30: true
-      compassnav.perks.free.31: true
-      compassnav.perks.free.32: true
-      compassnav.perks.free.33: true
-      compassnav.perks.free.34: true
-      compassnav.perks.free.35: true
-      compassnav.perks.free.36: true
-      compassnav.perks.free.37: true
-      compassnav.perks.free.38: true
-      compassnav.perks.free.39: true
-      compassnav.perks.free.40: true
-      compassnav.perks.free.41: true
-      compassnav.perks.free.42: true
-      compassnav.perks.free.43: true
-      compassnav.perks.free.44: true
-      compassnav.perks.free.45: true
-      compassnav.perks.free.46: true
-      compassnav.perks.free.47: true
-      compassnav.perks.free.48: true
-      compassnav.perks.free.49: true
-      compassnav.perks.free.50: true
-      compassnav.perks.free.51: true
-      compassnav.perks.free.52: true
-      compassnav.perks.free.53: true
-      compassnav.perks.free.54: true
   compassnav.perks.useanywhere:
     description: Allows you to use the compass anywhere.
     default: op
@@ -170,15 +74,3 @@ permissions:
   compassnav.perks.use.region:
     description: Allows you to use the compass in WorldGuard regions with compasses disabled.
     default: op
-  compassnav.admin.sign:
-    description: Allows you to create and use Teleport signs.
-    default: op
-    children:
-      compassnav.admin.sign.create: true
-      compassnav.admin.sign.use: true
-  compassnav.admin.sign.create:
-    description: Allows you to create Teleport signs.
-    default: op
-  compassnav.admin.sign.use:
-    description: Allows you to use Teleport signs.
-    default: true
