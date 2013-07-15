@@ -25,8 +25,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.avaje.ebean.enhance.ant.StringReplace;
-
 public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
@@ -252,22 +250,20 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
-			if (e.getInventory().getTitle() == plugin.getConfig().getString("GUIName")) {
-				if (e.getSlotType() == SlotType.CONTAINER) {
-					if (e.isLeftClick()) {
-						if (e.isShiftClick() == false) {
-							int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
-							for (int slot : rows) {
-								if (e.getRawSlot() == slot - 1) {
-									if (sectionExists(slot, ".Enabled")) {
-										if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
-											if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
-												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-												checkMoney(player, slot);
-											} else {
-												player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
-											}
+		if (e.getInventory().getTitle() == plugin.getConfig().getString("GUIName")) {
+			if (e.getSlotType() == SlotType.CONTAINER) {
+				if (e.isLeftClick()) {
+					if (e.isShiftClick() == false) {
+						int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
+						for (int slot : rows) {
+							if (e.getRawSlot() == slot - 1) {
+								if (sectionExists(slot, ".Enabled")) {
+									if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
+										if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
+											player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+											checkMoney(player, slot);
+										} else {
+											player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 										}
 									}
 								}
