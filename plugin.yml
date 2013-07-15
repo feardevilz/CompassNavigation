@@ -1,5 +1,5 @@
 name: CompassNavigation
-version: 1.6.2
+version: 1.7-SNAPSHOT
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
 website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
@@ -35,7 +35,7 @@ permissions:
     description: Allows you to create and use Teleport signs.
     default: op
     children:
-      compassnav.sign.create: true
+      compassnav.admin.sign.create: true
       compassnav.sign.use: true
   compassnav.admin.help:
     description: Allows usage of /compassnav help.
@@ -51,7 +51,7 @@ permissions:
   compassnav.admin.setup:
     description: Allows usage of /compassnav setup.
     default: op
-  compassnav.sign.create:
+  compassnav.admin.sign.create:
     description: Allows you to create Teleport signs.
     default: op
   compassnav.sign.use:

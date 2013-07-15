@@ -25,6 +25,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.avaje.ebean.enhance.ant.StringReplace;
+
 public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
@@ -89,6 +91,17 @@ public class EventListener implements Listener {
     	}
     }
     
+    public String handleModifiers(String string, Player player) {
+    	string = string.replace("<name>", player.getName());
+    	string = string.replace("<displayname>", player.getDisplayName());
+    	string = string.replace("<x>", Integer.toString(player.getLocation().getBlockX()));
+    	string = string.replace("<y>", Integer.toString(player.getLocation().getBlockY()));
+    	string = string.replace("<z>", Integer.toString(player.getLocation().getBlockZ()));
+    	string = string.replace("<yaw>", Integer.toString((int) player.getLocation().getYaw()));
+    	string = string.replace("<pitch>", Integer.toString((int) player.getLocation().getPitch()));
+    	return string;
+    }
+    
     public void checkMoney(Player player, int slot) {
 		if (sectionExists(slot, ".Price")) {
 			Double price = plugin.getConfig().getDouble(slot + ".Price");
@@ -121,9 +134,9 @@ public class EventListener implements Listener {
     public void checkBungee(Player player, int slot) {
     	if (sectionExists(slot, ".Command")) {
     		if (plugin.getConfig().getString(slot + ".Command").startsWith("c:")) {
-    			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(slot + ".Command").substring(2));
+    			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), handleModifiers(plugin.getConfig().getString(slot + ".Command").substring(2), player));
     		} else {
-    			Bukkit.dispatchCommand(player, plugin.getConfig().getString(slot + ".Command"));
+    			Bukkit.dispatchCommand(player, handleModifiers(plugin.getConfig().getString(slot + ".Command"), player));
     		}
     	}
 		if (sectionExists(slot, ".Bungee")) {
@@ -271,7 +284,7 @@ public class EventListener implements Listener {
 	public void onSignInteract(PlayerInteractEvent event) {
 		try {
 			Block block = event.getClickedBlock();
-			if (event.getPlayer().hasPermission("compassnav.admin.sign.use")) {
+			if (event.getPlayer().hasPermission("compassnav.sign.use")) {
 				if (block.getTypeId() == 63 || block.getTypeId() == 68) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 						Sign sign = (Sign) block.getState();
