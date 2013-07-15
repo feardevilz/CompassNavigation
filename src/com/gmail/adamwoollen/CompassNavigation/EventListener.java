@@ -46,7 +46,10 @@ public class EventListener implements Listener {
     	if (sectionExists(slot, ".Enabled")) {
     		if (plugin.getConfig().getBoolean(slot + ".Enabled") == true) {
     			lore.clear();
-    			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
+    			String Name = null;
+    			try {
+    				Name = "§r" + ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
+    			} catch (Exception e) {}
     			String Item = plugin.getConfig().getString(slot + ".Item");
     			short Damage = 0;
     			int Amount = 1;
