@@ -32,6 +32,7 @@ CompassDesc:
   - '&6Teleport around with this compass!'
 Metrics: true
 AutoUpdater: true
+Sounds: true
 1:
   Enabled: true
   Item: '51'

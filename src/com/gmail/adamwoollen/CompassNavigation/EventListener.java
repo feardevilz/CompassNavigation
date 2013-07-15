@@ -181,7 +181,9 @@ public class EventListener implements Listener {
     }
     
     public void openInventory(Player player) {
-    	player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
+    	if (plugin.getConfig().getBoolean("Sounds")) {
+    		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
+    	}
 		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
 		
 		int[] row1 = {1,2,3,4,5,6,7,8,9};
@@ -260,10 +262,14 @@ public class EventListener implements Listener {
 								if (sectionExists(slot, ".Enabled")) {
 									if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
 										if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
-											player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+											if (plugin.getConfig().getBoolean("Sounds")) {
+												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+											}
 											checkMoney(player, slot);
 										} else {
-											player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
+											if (plugin.getConfig().getBoolean("Sounds")) {
+												player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
+											}
 										}
 									}
 								}
@@ -293,6 +299,7 @@ public class EventListener implements Listener {
 				    		} else {
 				    			openInventory(player);
 				    		}
+							event.setCancelled(true);
 				        }
 					}
 				}
