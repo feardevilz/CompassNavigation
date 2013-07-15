@@ -19,6 +19,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
@@ -30,6 +31,8 @@ public class EventListener implements Listener {
 	public CompassNavigation plugin;
     public Inventory chest;
     public List<String> lore = new CopyOnWriteArrayList<String>();
+    public ItemStack compassItem;
+    public List<Player> giveCompassBack = new CopyOnWriteArrayList<Player>();
     
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
@@ -326,24 +329,58 @@ public class EventListener implements Listener {
 		} catch (Exception e) {}
 	}
 	
+	public void setCompassItem() {
+		lore.clear();
+		String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("CompassName"));
+		String Item = plugin.getConfig().getString("Item");
+		short Damage = 0;
+		int ID = Integer.parseInt(Item.split(":")[0]);
+		if (Item.split(":").length == 2) {
+			Damage = Short.parseShort(Item.split(":")[1]);
+		}
+		for (String iLore : plugin.getConfig().getStringList("CompassDesc")) {
+			lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
+		}
+		compassItem = setName(new ItemStack(ID, 1, Damage), Name, lore);
+	}
+	
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
-			lore.clear();
-			String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("CompassName"));
-			String Item = plugin.getConfig().getString("Item");
-			short Damage = 0;
-			int ID = Integer.parseInt(Item.split(":")[0]);
-			if (Item.split(":").length == 2) {
-				Damage = Short.parseShort(Item.split(":")[1]);
+			if (!plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) || (player.hasPermission("compassnav.perks.use.world"))) {
+    			if (plugin.canUseCompassHere(player.getLocation()) || (player.hasPermission("compassnav.perks.use.region"))) {
+					if (!player.getInventory().contains(compassItem)) {
+						player.getInventory().addItem(compassItem);
+					}
+    			}
 			}
-			for (String iLore : plugin.getConfig().getStringList("CompassDesc")) {
-				lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
+		}
+		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+			if (player.getInventory().contains(compassItem)) {
+				player.getInventory().remove(compassItem);
+				giveCompassBack.add(player);
 			}
-			ItemStack item = setName(new ItemStack(ID, 1, Damage), Name, lore);
-			if (!player.getInventory().contains(item)) {
-				player.getInventory().addItem(item);
+		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+			if (player.getInventory().contains(compassItem)) {
+				player.getInventory().remove(compassItem);
+				giveCompassBack.add(player);
+			}
+		} else if (giveCompassBack.contains(player)) {
+			if (!player.getInventory().contains(compassItem)) {
+				player.getInventory().addItem(compassItem);
+				giveCompassBack.remove(player);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onItemDrop(PlayerDropItemEvent event) {
+		Player player = event.getPlayer();
+		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
+			if (event.getItemDrop().getItemStack().getTypeId() == plugin.getConfig().getInt("Item")) {
+				player.sendMessage(plugin.prefix + "§6You can't drop your compass here!");
+				event.setCancelled(true);
 			}
 		}
 	}

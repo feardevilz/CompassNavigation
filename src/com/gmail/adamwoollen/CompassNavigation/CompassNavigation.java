@@ -48,6 +48,7 @@ public class CompassNavigation extends JavaPlugin {
 		} catch (Exception e) {}
         
         eventListener = new EventListener(this);
+        eventListener.setCompassItem();
 		getServer().getPluginManager().registerEvents(eventListener, this);
 		
 		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
@@ -154,12 +155,14 @@ public class CompassNavigation extends JavaPlugin {
     					Player player = (Player) sender;
     					if (player.hasPermission("compassnav.admin.reload")) {
     						reloadConfig();
+    						eventListener.setCompassItem();
     						player.sendMessage(prefix + "§6CompassNavigation reloaded!");;
 				    	} else {
 				    		player.sendMessage("§4You do not have access to that command.");
 				    	}
     				} else {
     					reloadConfig();
+    					eventListener.setCompassItem();
     					getLogger().info(consolePrefix + "CompassNavigation reloaded!");
     				}
     			} else if (args[0].equalsIgnoreCase("setup")) {
