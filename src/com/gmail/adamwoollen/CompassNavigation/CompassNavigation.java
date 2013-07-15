@@ -84,6 +84,7 @@ public class CompassNavigation extends JavaPlugin {
 			}
 			sender.sendMessage("§2/compassnav setup loc§a - Sets location");
 			sender.sendMessage("§2/compassnav setup bungee <server>§a - Sets BungeeCord server");
+			sender.sendMessage("§2/compassnav setup lilypad <server>§a - Sets Lilypad server");
 			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
 			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
 			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
@@ -221,6 +222,9 @@ public class CompassNavigation extends JavaPlugin {
 								} else if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", null);
 									player.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
+								} else if (args[1].equalsIgnoreCase("lilypad"))
+									getConfig().set(slot + ".Lilypad", null);
+									player.sendMessage(prefix + "§6Lilypad unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("desc")) {
 									getConfig().set(slot + ".Desc", null);
 									player.sendMessage(prefix + "§6Description unset for slot " + slot + "!");
@@ -260,7 +264,7 @@ public class CompassNavigation extends JavaPlugin {
 							player.sendMessage("§4You do not have access to that command.");
 						}
 					} else {
-						sendHelpMessage(player);
+						sendHelpMessage((Player) sender);
 					}
 				} else {
 					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
@@ -274,6 +278,9 @@ public class CompassNavigation extends JavaPlugin {
 								if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", handleString(args));
 									player.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
+								} else if (args[1].equalsIgnoreCase("lilypad")) {
+									getConfig().set(slot + ".Lilypad", handleString(args));
+									player.sendMessage(prefix + "§6Lilypad set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("name")) {
 									getConfig().set(slot + ".Name", handleString(args));
 									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
@@ -334,7 +341,6 @@ public class CompassNavigation extends JavaPlugin {
 				} else {
 					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
 				}
-			}
     	} else if (cmd.getName().equalsIgnoreCase(getConfig().getString("CommandName"))) {
     		if (sender instanceof Player) {
 				Player player = (Player) sender;
@@ -352,6 +358,8 @@ public class CompassNavigation extends JavaPlugin {
     		} else {
     			getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
     		}
+    	} else {
+    		sendHelpMessage((Player) sender);
     	}
     	return true;
 	}
