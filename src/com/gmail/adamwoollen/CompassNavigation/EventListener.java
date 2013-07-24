@@ -192,7 +192,7 @@ public class EventListener implements Listener {
     	if (plugin.getConfig().getBoolean("Sounds")) {
     		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     	}
-		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), plugin.getConfig().getString("GUIName"));
+		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName")));
 		
 		int[] row1 = {1,2,3,4,5,6,7,8,9};
 		int[] row2 = {10,11,12,13,14,15,16,17,18};
@@ -260,7 +260,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		if (e.getInventory().getTitle() == plugin.getConfig().getString("GUIName")) {
+		if (e.getInventory().getTitle() == ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"))) {
 			if (e.getSlotType() == SlotType.CONTAINER) {
 				if (e.isLeftClick()) {
 					if (e.isShiftClick() == false) {
