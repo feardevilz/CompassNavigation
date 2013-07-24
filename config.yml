@@ -12,12 +12,11 @@
 # You can specify data values for the item. For example: 35:2
 # You can specify Essentials warps using the Warp option.
 # You can also specify BungeeCord servers using the Bungee option.
-# You can also specify Lilypad servers using the Lilypad option.
 # You can specify prices for using certain slots with the Price option.
 # You can specify item amouints with the Amount option.
 # You can specify enchanted status with the Enchanted option (true or false).
 # You can specify commands to run with the Command option (Don't include the first slash). To run a console command just write "c:" before the command itself. Use those modifiers: <name>, <displayname>, <x>, <y>, <z>, <yaw>, <pitch>.
-# You can set up slots ingame with /cn setup!
+# Set up slots ingame with /cn setup!
 # If you are in a world that is in the Must Have Compass list, then if you lose your compass it automatically gives it back to you, according to CompassName and CompassDesc.
 # Don't forget to add items to the config!
 
@@ -34,18 +33,6 @@ CompassDesc:
 Metrics: true
 AutoUpdater: true
 Sounds: true
-1:
-  Enabled: true
-  Item: '51'
-  Name: '&6&lFire Land'
-  Desc:
-    - '&eTo the land of &6fire!'
-  World: world
-  X: 0
-  Y: 64
-  Z: 0
-  Yaw: 0
-  Pitch: 0
 DisabledWorlds:
   - example1
   - example2

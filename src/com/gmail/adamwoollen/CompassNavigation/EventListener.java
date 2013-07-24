@@ -154,25 +154,11 @@ public class EventListener implements Listener {
 
 				player.sendPluginMessage(plugin, "BungeeCord", b.toByteArray());
 			} catch (Exception e) {
-				checkLilypad(player, slot);
+				checkWarp(player, slot);
 			}
 		} else {
-			checkLilypad(player, slot);
+			checkWarp(player, slot);
 		}
-    }
-    
-    public void checkLilypad(Player player, int slot) {
-    	if (sectionExists(slot, ".Lilypad")) {
-    		try {
-    			if (plugin.lilypadHandler.connect(player, slot) == false) {
-    				checkWarp(player, slot);
-    			}
-    		} catch (Exception e) {
-    			checkWarp(player, slot);
-    		}
-    	} else {
-    		checkWarp(player, slot);
-    	}
     }
     
     public void checkWarp(Player player, int slot) {
@@ -364,8 +350,8 @@ public class EventListener implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
-			if (!plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) || (player.hasPermission("compassnav.perks.use.world"))) {
-    			if (plugin.canUseCompassHere(player.getLocation()) || (player.hasPermission("compassnav.perks.use.region"))) {
+			if ((!plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) || (player.hasPermission("compassnav.perks.use.world"))) {
+    			if ((plugin.canUseCompassHere(player.getLocation())) || (player.hasPermission("compassnav.perks.use.region"))) {
 					if (!player.getInventory().contains(compassItem)) {
 						player.getInventory().addItem(compassItem);
 					}
@@ -377,12 +363,14 @@ public class EventListener implements Listener {
 				player.getInventory().remove(compassItem);
 				giveCompassBack.add(player);
 			}
-		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+		}
+		if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
 			if (player.getInventory().contains(compassItem)) {
 				player.getInventory().remove(compassItem);
 				giveCompassBack.add(player);
 			}
-		} else if (giveCompassBack.contains(player)) {
+		}
+		if (giveCompassBack.contains(player)) {
 			if (!player.getInventory().contains(compassItem)) {
 				player.getInventory().addItem(compassItem);
 				giveCompassBack.remove(player);

@@ -2,9 +2,6 @@ package com.gmail.adamwoollen.CompassNavigation;
 
 import org.bukkit.entity.Player;
 
-import lilypad.client.connect.api.Connect;
-import lilypad.client.connect.api.request.impl.RedirectRequest;
-
 public class LilypadHandler {
 
 	public CompassNavigation plugin;
@@ -15,8 +12,8 @@ public class LilypadHandler {
     
     public boolean connect(Player player, int slot) {
     	try {
-    		Connect connect = (Connect) plugin.getServer().getServicesManager().getRegistration(Connect.class).getProvider();
-    		connect.request(new RedirectRequest(plugin.getConfig().getString(slot + ".Lilypad"), player.getName()));
+    		lilypad.client.connect.api.Connect connect = (lilypad.client.connect.api.Connect) plugin.getServer().getServicesManager().getRegistration(lilypad.client.connect.api.Connect.class).getProvider();
+    		connect.request(new lilypad.client.connect.api.request.impl.RedirectRequest(plugin.getConfig().getString(slot + ".Lilypad"), player.getName()));
     		return true;
     	} catch (Exception e) {}
     	return false;

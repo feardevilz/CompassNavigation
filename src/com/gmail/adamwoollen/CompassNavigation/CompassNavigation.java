@@ -21,7 +21,6 @@ public class CompassNavigation extends JavaPlugin {
 	public WorldGuardHandler worldGuardHandler;
 	public ProtocolLibHandler protocolLibHandler;
 	public EventListener eventListener;
-	public LilypadHandler lilypadHandler;
 	public Metrics metrics;
 	public String slot = "0";
 	
@@ -47,10 +46,6 @@ public class CompassNavigation extends JavaPlugin {
         		new AutoUpdater(this);
         	}
 		} catch (Exception e) {}
-        
-        try {
-        	lilypadHandler = new LilypadHandler(this);
-        } catch (Exception e) {}
         
         eventListener = new EventListener(this);
         eventListener.setCompassItem();
@@ -89,7 +84,6 @@ public class CompassNavigation extends JavaPlugin {
 			}
 			sender.sendMessage("§2/compassnav setup loc§a - Sets location");
 			sender.sendMessage("§2/compassnav setup bungee <server>§a - Sets BungeeCord server");
-			sender.sendMessage("§2/compassnav setup lilypad <server>§a - Sets Lilypad server");
 			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
 			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
 			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
@@ -227,9 +221,6 @@ public class CompassNavigation extends JavaPlugin {
 								} else if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", null);
 									player.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
-								} else if (args[1].equalsIgnoreCase("lilypad"))
-									getConfig().set(slot + ".Lilypad", null);
-									player.sendMessage(prefix + "§6Lilypad unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("desc")) {
 									getConfig().set(slot + ".Desc", null);
 									player.sendMessage(prefix + "§6Description unset for slot " + slot + "!");
@@ -283,9 +274,6 @@ public class CompassNavigation extends JavaPlugin {
 								if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", handleString(args));
 									player.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
-								} else if (args[1].equalsIgnoreCase("lilypad")) {
-									getConfig().set(slot + ".Lilypad", handleString(args));
-									player.sendMessage(prefix + "§6Lilypad set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("name")) {
 									getConfig().set(slot + ".Name", handleString(args));
 									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
@@ -366,6 +354,7 @@ public class CompassNavigation extends JavaPlugin {
     	} else {
     		sendHelpMessage((Player) sender);
     	}
-    	return true;
+    	}
+		return true;
 	}
 }

@@ -86,12 +86,5 @@
   		<scope>system</scope>
   		<systemPath>${project.basedir}/ProtocolLib.jar</systemPath>
   	</dependency>
-  	<dependency>
-  		<groupId>lilypad.bukkit</groupId>
-  		<artifactId>Bukkit-Connect</artifactId>
-  		<version>23</version>
-  		<scope>system</scope>
-  		<systemPath>${project.basedir}/Bukkit-Connect.jar</systemPath>
-  	</dependency>
 	</dependencies>
 </project>
