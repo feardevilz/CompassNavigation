@@ -5,12 +5,6 @@ import java.io.DataOutputStream;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import lilypad.client.connect.api.Connect;
-import lilypad.client.connect.api.request.impl.RedirectRequest;
-import lilypad.client.connect.api.result.FutureResultListener;
-import lilypad.client.connect.api.result.StatusCode;
-import lilypad.client.connect.api.result.impl.RedirectResult;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -167,24 +161,15 @@ public class EventListener implements Listener {
 		}
     }
     
-    public Connect getBukkitConnect() {
-        return (Connect) plugin.getServer().getServicesManager().getRegistration(Connect.class).getProvider();
-    }
-    
-    public void checkLilypad(final Player player, final int slot) {
+    public void checkLilypad(Player player, int slot) {
     	if (sectionExists(slot, ".Lilypad")) {
     		try {
-    			Connect connect = getBukkitConnect();
-                connect.request(new RedirectRequest(plugin.getConfig().getString(slot + ".Lilypad"), player.getName())).registerListener(new FutureResultListener<RedirectResult>() {
-                	public void onResult(RedirectResult redirectResult) {
-                    	if (redirectResult.getStatusCode() != StatusCode.SUCCESS) {
-                    		checkWarp(player, slot);
-                    	}
-                	}
-                  });
-            } catch (Exception e) {
-            	checkWarp(player, slot);
-            }
+    			if (plugin.lilypadHandler.connect(player, slot) == false) {
+    				checkWarp(player, slot);
+    			}
+    		} catch (Exception e) {
+    			checkWarp(player, slot);
+    		}
     	} else {
     		checkWarp(player, slot);
     	}

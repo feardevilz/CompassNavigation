@@ -21,6 +21,7 @@ public class CompassNavigation extends JavaPlugin {
 	public WorldGuardHandler worldGuardHandler;
 	public ProtocolLibHandler protocolLibHandler;
 	public EventListener eventListener;
+	public LilypadHandler lilypadHandler;
 	public Metrics metrics;
 	public String slot = "0";
 	
@@ -46,6 +47,10 @@ public class CompassNavigation extends JavaPlugin {
         		new AutoUpdater(this);
         	}
 		} catch (Exception e) {}
+        
+        try {
+        	lilypadHandler = new LilypadHandler(this);
+        } catch (Exception e) {}
         
         eventListener = new EventListener(this);
         eventListener.setCompassItem();
