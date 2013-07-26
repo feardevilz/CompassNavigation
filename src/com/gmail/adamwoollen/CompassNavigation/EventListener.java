@@ -46,6 +46,20 @@ public class EventListener implements Listener {
     	}
     	return false;
     }
+    
+    public int getID(String id) {
+    	String[] split = id.split(":");
+    	return Integer.parseInt(split[0]);
+    }
+    
+    public short getDamage(String id) {
+    	String[] split = id.split(":");
+    	if (split.length >= 2) {
+    		return Short.parseShort(split[1]);
+    	} else {
+    		return (short) 0;
+    	}
+    }
 	
     public void handleSlot(Player player, int slot, Inventory chest) {
     	if (sectionExists(slot, ".Enabled")) {
@@ -56,12 +70,9 @@ public class EventListener implements Listener {
     				Name = "§r" + ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
     			} catch (Exception e) {}
     			String Item = plugin.getConfig().getString(slot + ".Item");
-    			short Damage = 0;
     			int Amount = 1;
-    			int ID = Integer.parseInt(Item.split(":")[0]);
-    			if (Item.split(":").length == 2) {
-    				Damage = Short.parseShort(Item.split(":")[1]);
-    			}
+    			int ID = getID(Item);
+    			short Damage = getDamage(Item);
     			if (sectionExists(slot, ".Amount")) {
     				if ((plugin.getConfig().getInt(slot + ".Amount") <= 64) && (plugin.getConfig().getInt(slot + ".Amount") >= 1)) {
     					Amount = plugin.getConfig().getInt(slot + ".Amount");
@@ -265,7 +276,7 @@ public class EventListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 		    Player player = event.getPlayer();
-		    if (player.getItemInHand().getTypeId() == plugin.getConfig().getInt("Item")) {
+		    if ((player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData() == getDamage(plugin.getConfig().getString("Item"))))) {
 		    	if (player.hasPermission("compassnav.use")) {
 					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
 		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
@@ -352,11 +363,8 @@ public class EventListener implements Listener {
 		lore.clear();
 		String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("CompassName"));
 		String Item = plugin.getConfig().getString("Item");
-		short Damage = 0;
-		int ID = Integer.parseInt(Item.split(":")[0]);
-		if (Item.split(":").length == 2) {
-			Damage = Short.parseShort(Item.split(":")[1]);
-		}
+		int ID = getID(Item);
+		short Damage = getDamage(Item);
 		for (String iLore : plugin.getConfig().getStringList("CompassDesc")) {
 			lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
 		}
