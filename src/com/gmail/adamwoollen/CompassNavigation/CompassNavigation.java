@@ -26,8 +26,12 @@ public class CompassNavigation extends JavaPlugin {
 	
 	public void onEnable() {
 		getConfig().options().copyDefaults(true);
-		saveConfig();
         getWorldGuard();
+        
+        migrateToList();
+        migrateFromDesc();
+        
+		saveConfig();
         
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
         	protocolLibHandler = new ProtocolLibHandler(this);
@@ -54,6 +58,39 @@ public class CompassNavigation extends JavaPlugin {
 		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
 			prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("Prefix") + " ");
 			consolePrefix = ChatColor.stripColor(prefix);
+		}
+	}
+	
+	public void migrateToList() {
+		int[] numbers = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
+		
+		for (int number : numbers) {
+			if (getConfig().contains(number + ".Desc")) {
+				if (getConfig().isString(number + ".Desc")) {
+					List<String> newLore = new CopyOnWriteArrayList<String>();
+					newLore.add(getConfig().getString(number + ".Desc"));
+					getConfig().set(number + ".Lore", newLore);
+					getConfig().set(number + ".Desc", null);
+				}
+			}
+		}
+	}
+	
+	public void migrateFromDesc() {
+		int[] numbers = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
+		
+		for (int number : numbers) {
+			if (getConfig().contains(number + ".Desc")) {
+				List<String> newLore = getConfig().getStringList(number + ".Desc");
+				getConfig().set(number + ".Lore", newLore);
+				getConfig().set(number + ".Desc", null);
+			}
+		}
+		
+		if (getConfig().contains("CompassDesc")) {
+			List<String> newLore = getConfig().getStringList("CompassDesc");
+			getConfig().set("CompassLore", newLore);
+			getConfig().set("CompassDesc", null);
 		}
 	}
 	
@@ -88,7 +125,7 @@ public class CompassNavigation extends JavaPlugin {
 			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
 			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
 			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
-			sender.sendMessage("§2/compassnav setup desc [number] <description>§a - Sets item description");
+			sender.sendMessage("§2/compassnav setup lore [number] <lore>§a - Sets item lore");
 			sender.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
 			sender.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
 			sender.sendMessage("§2/compassnav setup command <command>§a - Sets the executable command");
@@ -225,9 +262,9 @@ public class CompassNavigation extends JavaPlugin {
 								} else if (args[1].equalsIgnoreCase("lilypad")) {
 									getConfig().set(slot + ".Lilypad", null);
 									player.sendMessage(prefix + "§6Lilypad unset for slot " + slot + "!");
-								} else if (args[1].equalsIgnoreCase("desc")) {
-									getConfig().set(slot + ".Desc", null);
-									player.sendMessage(prefix + "§6Description unset for slot " + slot + "!");
+								} else if (args[1].equalsIgnoreCase("lore")) {
+									getConfig().set(slot + ".Lore", null);
+									player.sendMessage(prefix + "§6Lore unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", null);
 									player.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
@@ -284,35 +321,35 @@ public class CompassNavigation extends JavaPlugin {
 								} else if (args[1].equalsIgnoreCase("name")) {
 									getConfig().set(slot + ".Name", handleString(args));
 									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
-								} else if (args[1].equalsIgnoreCase("desc")) {
-									List<String> lore = new CopyOnWriteArrayList<String>();
+								} else if (args[1].equalsIgnoreCase("lore")) {
+									List<String> loreList = new CopyOnWriteArrayList<String>();
 									if (args.length >= 4) {
-										String desc = handleString(args);
+										String lore = handleString(args);
 										try {
 											int number = Integer.parseInt(args[2]);
-											desc = desc.split(" ", 2)[1];
-											for (String iDesc : getConfig().getStringList(slot + ".Desc")) {
-												lore.add(iDesc);
+											lore = lore.split(" ", 2)[1];
+											for (String secondLore : getConfig().getStringList(slot + ".Lore")) {
+												loreList.add(secondLore);
 											}
-											lore.set(number - 1, desc);
-											getConfig().set(slot + ".Desc", lore);
+											loreList.set(number - 1, lore);
+											getConfig().set(slot + ".Lore", loreList);
 										} catch (Exception e) {
-											String iDesc = handleString(args);
-											for (String iiDesc : getConfig().getStringList(slot + ".Desc")) {
-												lore.add(iiDesc);
+											String loreString = handleString(args);
+											for (String secondLore : getConfig().getStringList(slot + ".Lore")) {
+												loreList.add(secondLore);
 											}
-											lore.add(iDesc);
-											getConfig().set(slot + ".Desc", lore);
+											loreList.add(loreString);
+											getConfig().set(slot + ".Lore", loreList);
 										}
 									} else {
-										String iDesc = handleString(args);
-										for (String iiDesc : getConfig().getStringList(slot + ".Desc")) {
-											lore.add(iiDesc);
+										String loreString = handleString(args);
+										for (String secondLore : getConfig().getStringList(slot + ".Lore")) {
+											loreList.add(secondLore);
 										}
-										lore.add(iDesc);
-										getConfig().set(slot + ".Desc", lore);
+										loreList.add(loreString);
+										getConfig().set(slot + ".Lore", loreList);
 									}
-									player.sendMessage(prefix + "§6Description set for slot " + slot + "!");
+									player.sendMessage(prefix + "§6Lore set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", handleString(args));
 									player.sendMessage(prefix + "§6Warp set for slot " + slot + "!");

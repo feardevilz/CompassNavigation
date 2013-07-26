@@ -56,9 +56,8 @@ public class EventListener implements Listener {
     	String[] split = id.split(":");
     	if (split.length >= 2) {
     		return Short.parseShort(split[1]);
-    	} else {
-    		return (short) 0;
     	}
+    	return (short) 0;
     }
 	
     public void handleSlot(Player player, int slot, Inventory chest) {
@@ -66,9 +65,9 @@ public class EventListener implements Listener {
     		if (plugin.getConfig().getBoolean(slot + ".Enabled") == true) {
     			lore.clear();
     			String Name = null;
-    			try {
+    			if (sectionExists(slot, ".Name")) {
     				Name = "§r" + ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
-    			} catch (Exception e) {}
+    			}
     			String Item = plugin.getConfig().getString(slot + ".Item");
     			int Amount = 1;
     			int ID = getID(Item);
@@ -78,9 +77,9 @@ public class EventListener implements Listener {
     					Amount = plugin.getConfig().getInt(slot + ".Amount");
     				}
     			}
-				if (sectionExists(slot, ".Desc")) {
-					for (String iLore : plugin.getConfig().getStringList(slot + ".Desc")) {
-						lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
+				if (sectionExists(slot, ".Lore")) {
+					for (String loreLine : plugin.getConfig().getStringList(slot + ".Lore")) {
+						lore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
 					}
 				}
 				ItemStack stack = new ItemStack(ID, Amount, Damage);
@@ -98,12 +97,10 @@ public class EventListener implements Listener {
 						}
 					}
 				}
-				if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
-					chest.setItem(slot - 1, setName(stack, Name, lore));
-				} else {
+				if (!(player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.hasPermission("compassnav.*")))) {
 					lore.add("§4No permission");
-					chest.setItem(slot - 1, setName(new ItemStack(36, 1), Name, lore));
 				}
+				chest.setItem(slot - 1, setName(stack, Name, lore));
     		}
     	}
     }
@@ -365,7 +362,7 @@ public class EventListener implements Listener {
 		String Item = plugin.getConfig().getString("Item");
 		int ID = getID(Item);
 		short Damage = getDamage(Item);
-		for (String iLore : plugin.getConfig().getStringList("CompassDesc")) {
+		for (String iLore : plugin.getConfig().getStringList("CompassLore")) {
 			lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
 		}
 		compassItem = setName(new ItemStack(ID, 1, Damage), Name, lore);
