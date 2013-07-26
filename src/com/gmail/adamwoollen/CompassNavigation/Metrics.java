@@ -1,19 +1,15 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
@@ -29,31 +25,31 @@ import java.util.zip.GZIPOutputStream;
 
 public class Metrics {
 
-    private final static int REVISION = 7;
+    public static int REVISION = 7;
 
-    private static final String BASE_URL = "http://report.mcstats.org";
+    public static String BASE_URL = "http://report.mcstats.org";
 
-    private static final String REPORT_URL = "/plugin/%s";
+    public static String REPORT_URL = "/plugin/%s";
 
-    private static final int PING_INTERVAL = 15;
+    public static int PING_INTERVAL = 15;
 
-    private final Plugin plugin;
+    public CompassNavigation plugin;
 
-    private final Set<Graph> graphs = Collections.synchronizedSet(new HashSet<Graph>());
+    public Set<Graph> graphs = Collections.synchronizedSet(new HashSet<Graph>());
 
-    private final YamlConfiguration configuration;
+    public YamlConfiguration configuration;
 
-    private final File configurationFile;
+    public File configurationFile;
 
-    private final String guid;
+    public String guid;
 
-    private final boolean debug;
+    public boolean debug;
 
-    private final Object optOutLock = new Object();
+    public Object optOutLock = new Object();
 
-    private volatile BukkitTask task = null;
+    public volatile BukkitTask task = null;
 
-    public Metrics(final Plugin plugin) throws IOException {
+    public Metrics(CompassNavigation plugin) throws Exception {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
@@ -76,19 +72,19 @@ public class Metrics {
         debug = configuration.getBoolean("debug", false);
     }
     
-    public Graph createGraph(final String name) {
+    public Graph createGraph(String name) {
         if (name == null) {
             throw new IllegalArgumentException("Graph name cannot be null");
         }
 
-        final Graph graph = new Graph(name);
+        Graph graph = new Graph(name);
 
         graphs.add(graph);
 
         return graph;
     }
 
-    public void addGraph(final Graph graph) {
+    public void addGraph(Graph graph) {
         if (graph == null) {
             throw new IllegalArgumentException("Graph cannot be null");
         }
@@ -108,7 +104,7 @@ public class Metrics {
 
             task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
 
-                private boolean firstPost = true;
+                public boolean firstPost = true;
 
                 public void run() {
                     try {
@@ -125,7 +121,7 @@ public class Metrics {
                         postPlugin(!firstPost);
 
                         firstPost = false;
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         if (debug) {
                             Bukkit.getLogger().log(Level.INFO, "[Metrics] " + e.getMessage());
                         }
@@ -141,12 +137,7 @@ public class Metrics {
         synchronized (optOutLock) {
             try {
                 configuration.load(getConfigFile());
-            } catch (IOException ex) {
-                if (debug) {
-                    Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
-                }
-                return true;
-            } catch (InvalidConfigurationException ex) {
+            } catch (Exception ex) {
                 if (debug) {
                     Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
                 }
@@ -156,7 +147,7 @@ public class Metrics {
         }
     }
 
-    public void enable() throws IOException {
+    public void enable() throws Exception {
         synchronized (optOutLock) {
             if (isOptOut()) {
                 configuration.set("opt-out", false);
@@ -169,7 +160,7 @@ public class Metrics {
         }
     }
 
-    public void disable() throws IOException {
+    public void disable() throws Exception {
         synchronized (optOutLock) {
             if (!isOptOut()) {
                 configuration.set("opt-out", true);
@@ -189,7 +180,7 @@ public class Metrics {
         return new File(new File(pluginsFolder, "PluginMetrics"), "config.yml");
     }
 
-    private void postPlugin(final boolean isPing) throws IOException {
+    public void postPlugin(boolean isPing) throws Exception {
         PluginDescriptionFile description = plugin.getDescription();
         String pluginName = description.getName();
         boolean onlineMode = Bukkit.getServer().getOnlineMode();
@@ -237,7 +228,7 @@ public class Metrics {
 
                 boolean firstGraph = true;
 
-                final Iterator<Graph> iter = graphs.iterator();
+                Iterator<Graph> iter = graphs.iterator();
 
                 while (iter.hasNext()) {
                     Graph graph = iter.next();
@@ -299,7 +290,7 @@ public class Metrics {
         os.write(compressed);
         os.flush();
 
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String response = reader.readLine();
 
         os.close();
@@ -312,14 +303,14 @@ public class Metrics {
                 response = response.substring(response.startsWith("7,") ? 2 : 1);
             }
 
-            throw new IOException(response);
+            throw new Exception(response);
         } else {
             if (response.equals("1") || response.contains("This is your first update this hour")) {
                 synchronized (graphs) {
-                    final Iterator<Graph> iter = graphs.iterator();
+                    Iterator<Graph> iter = graphs.iterator();
 
                     while (iter.hasNext()) {
-                        final Graph graph = iter.next();
+                        Graph graph = iter.next();
 
                         for (Plotter plotter : graph.getPlotters()) {
                             plotter.reset();
@@ -337,19 +328,19 @@ public class Metrics {
         try {
             gzos = new GZIPOutputStream(baos);
             gzos.write(input.getBytes("UTF-8"));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (gzos != null) try {
                 gzos.close();
-            } catch (IOException ignore) {
+            } catch (Exception ignore) {
             }
         }
 
         return baos.toByteArray();
     }
 
-    private boolean isMineshafterPresent() {
+    public boolean isMineshafterPresent() {
         try {
             Class.forName("mineshafter.MineServer");
             return true;
@@ -358,7 +349,7 @@ public class Metrics {
         }
     }
 
-    private static void appendJSONPair(StringBuilder json, String key, String value) throws UnsupportedEncodingException {
+    public static void appendJSONPair(StringBuilder json, String key, String value) throws Exception {
         boolean isValueNumeric = false;
 
         try {
@@ -384,7 +375,7 @@ public class Metrics {
         }
     }
     
-    private static String escapeJSON(String text) {
+    public static String escapeJSON(String text) {
         StringBuilder builder = new StringBuilder();
 
         builder.append('"');
@@ -424,17 +415,17 @@ public class Metrics {
         return builder.toString();
     }
 
-    private static String urlEncode(final String text) throws UnsupportedEncodingException {
+    public static String urlEncode(String text) throws Exception {
         return URLEncoder.encode(text, "UTF-8");
     }
 
     public static class Graph {
 
-        private final String name;
+        public String name;
 
-        private final Set<Plotter> plotters = new LinkedHashSet<Plotter>();
+        public Set<Plotter> plotters = new LinkedHashSet<Plotter>();
 
-        private Graph(final String name) {
+        public Graph(String name) {
             this.name = name;
         }
         
@@ -442,11 +433,11 @@ public class Metrics {
             return name;
         }
 
-        public void addPlotter(final Plotter plotter) {
+        public void addPlotter(Plotter plotter) {
             plotters.add(plotter);
         }
 
-        public void removePlotter(final Plotter plotter) {
+        public void removePlotter(Plotter plotter) {
             plotters.remove(plotter);
         }
 
@@ -460,12 +451,12 @@ public class Metrics {
         }
 
         @Override
-        public boolean equals(final Object object) {
+        public boolean equals(Object object) {
             if (!(object instanceof Graph)) {
                 return false;
             }
 
-            final Graph graph = (Graph) object;
+            Graph graph = (Graph) object;
             return graph.name.equals(name);
         }
 
@@ -475,13 +466,13 @@ public class Metrics {
 
     public static abstract class Plotter {
 
-        private final String name;
+        public String name;
 
         public Plotter() {
             this("Default");
         }
 
-        public Plotter(final String name) {
+        public Plotter(String name) {
             this.name = name;
         }
 
@@ -500,12 +491,12 @@ public class Metrics {
         }
 
         @Override
-        public boolean equals(final Object object) {
+        public boolean equals(Object object) {
             if (!(object instanceof Plotter)) {
                 return false;
             }
 
-            final Plotter plotter = (Plotter) object;
+            Plotter plotter = (Plotter) object;
             return plotter.name.equals(name) && plotter.getValue() == getValue();
         }
     }

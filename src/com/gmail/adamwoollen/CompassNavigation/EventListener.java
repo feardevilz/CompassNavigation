@@ -2,6 +2,8 @@ package com.gmail.adamwoollen.CompassNavigation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -18,7 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -33,6 +34,7 @@ public class EventListener implements Listener {
     public List<String> lore = new CopyOnWriteArrayList<String>();
     public ItemStack compassItem;
     public List<Player> giveCompassBack = new CopyOnWriteArrayList<Player>();
+    public String title = "CompassNavigation";
     
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
@@ -154,12 +156,32 @@ public class EventListener implements Listener {
 
 				player.sendPluginMessage(plugin, "BungeeCord", b.toByteArray());
 			} catch (Exception e) {
-				checkWarp(player, slot);
+				checkLilypad(player, slot);
 			}
 		} else {
-			checkWarp(player, slot);
+			checkLilypad(player, slot);
 		}
     }
+    
+    public void checkLilypad(Player player, int slot) {
+    	if (sectionExists(slot, ".Lilypad")) {
+    		try {
+    			Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
+    			Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
+    			Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
+    			Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
+    			Method connection = connectClass.getDeclaredMethod("request", requestClass);
+    			
+    			Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
+    			connection.invoke(connect, request);
+    		} catch (Exception e) {
+    			checkWarp(player, slot);
+    		}
+    	} else {
+    		checkWarp(player, slot);
+    	}
+    }
+
     
     public void checkWarp(Player player, int slot) {
     	if (sectionExists(slot, ".Warp")) {
@@ -192,7 +214,8 @@ public class EventListener implements Listener {
     	if (plugin.getConfig().getBoolean("Sounds")) {
     		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     	}
-		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName")));
+    	title = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"));
+		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), title);
 		
 		int[] row1 = {1,2,3,4,5,6,7,8,9};
 		int[] row2 = {10,11,12,13,14,15,16,17,18};
@@ -260,32 +283,26 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		if (e.getInventory().getTitle() == ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"))) {
-			if (e.getSlotType() == SlotType.CONTAINER) {
-				if (e.isLeftClick()) {
-					if (e.isShiftClick() == false) {
-						int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
-						for (int slot : rows) {
-							if (e.getRawSlot() == slot - 1) {
-								if (sectionExists(slot, ".Enabled")) {
-									if (plugin.getConfig().getString(slot + ".Enabled") == "true") {
-										if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
-											if (plugin.getConfig().getBoolean("Sounds")) {
-												player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-											}
-											checkMoney(player, slot);
-										} else {
-											if (plugin.getConfig().getBoolean("Sounds")) {
-												player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
-											}
-										}
-									}
+		if (e.getInventory().getTitle().equals(title)) {
+			int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
+			for (int slot : rows) {
+				if (e.getRawSlot() == slot - 1) {
+					if (sectionExists(slot, ".Enabled")) {
+						if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
+							if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
+								if (plugin.getConfig().getBoolean("Sounds")) {
+									player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+								}
+								checkMoney(player, slot);
+							} else {
+								if (plugin.getConfig().getBoolean("Sounds")) {
+									player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 								}
 							}
+							e.setCancelled(true);
 						}
 					}
 				}
-			e.setCancelled(true);
 			}
 		}
 	}

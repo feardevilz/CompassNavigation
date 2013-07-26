@@ -37,7 +37,7 @@ public class WorldGuardHandler {
 			return set.allows(flag);
 		}
 
-		public static void injectHack() {
+		public static void addFlag() {
 			try {
 				Field field = DefaultFlag.class.getDeclaredField("flagsList");
 
@@ -58,6 +58,7 @@ public class WorldGuardHandler {
 
 				Field grm = WorldGuardPlugin.class.getDeclaredField("globalRegionManager");
 				grm.setAccessible(true);
+				
 				GlobalRegionManager globalRegionManager = (GlobalRegionManager) grm.get(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard"));
 
 				globalRegionManager.preload();
@@ -69,7 +70,7 @@ public class WorldGuardHandler {
 
 	public WorldGuardHandler(WorldGuardPlugin worldGuard) {
 		this.worldGuard = worldGuard;
-		CompassFlag.injectHack();
+		CompassFlag.addFlag();
 	}
 
 	public boolean canUseCompassHere(Location location) {

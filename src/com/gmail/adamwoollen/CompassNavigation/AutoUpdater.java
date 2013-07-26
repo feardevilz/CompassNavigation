@@ -13,9 +13,12 @@ import org.json.simple.parser.JSONParser;
 
 public class AutoUpdater implements Listener {
 	
+	public CompassNavigation plugin;
 	public String currentVersion;
   
   	public AutoUpdater(CompassNavigation plugin) {
+  		this.plugin = plugin;
+  		
 		currentVersion = plugin.getDescription().getVersion();
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
   	}
@@ -27,15 +30,16 @@ public class AutoUpdater implements Listener {
   			connection.connect();
   			InputStreamReader streamReader = new InputStreamReader(connection.getInputStream());
   			JSONParser jsonParser = new JSONParser();
-  			Object object = jsonParser.parse(streamReader);
-  			JSONObject jsonObject = (JSONObject) object;
+  			JSONObject jsonObject = (JSONObject) jsonParser.parse(streamReader);
   			String newVersion = (String) jsonObject.get("version");
   			if (!currentVersion.equals(newVersion)) {
   				streamReader.close();
-  				player.sendMessage("§b[CompassNavigation] §9New version available!");
-  				player.sendMessage("§9See §3" + jsonObject.get("link") + " §9for more information.");
+  				player.sendMessage("§b[CompassNavigation] §rCompassNavigation v" + newVersion + " is now available!");
+  				player.sendMessage("Your version: v" + currentVersion);
   			}
-  		} catch (Exception e) {}
+  		} catch (Exception e) {
+  			plugin.getLogger().info(plugin.consolePrefix + "Couldn't run AutoUpdater for player " + player.getName() + ".");
+  		}
   	}
   
   	@EventHandler

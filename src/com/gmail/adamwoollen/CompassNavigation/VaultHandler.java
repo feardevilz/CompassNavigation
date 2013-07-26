@@ -6,12 +6,12 @@ public class VaultHandler {
 
 	public Economy vaultPlugin;
 
-	public VaultHandler(CompassNavigation plugin, Economy vaultPlugin) {
+	public VaultHandler(Economy vaultPlugin) {
 		this.vaultPlugin = vaultPlugin;
 	}
 
-	public boolean subtract(String player, double amount) {
-		return vaultPlugin.withdrawPlayer(player, amount).transactionSuccess();
+	public void subtract(String player, double amount) {
+		vaultPlugin.withdrawPlayer(player, amount);
 	}
 
 	public boolean hasEnough(String player, double amount) {
