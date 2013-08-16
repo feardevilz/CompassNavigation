@@ -13,10 +13,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CompassNavigation extends JavaPlugin {
 	
 	public String prefix = "";
-	public String consolePrefix = "";
-	public WorldGuardHandler worldGuardHandler;
-	public ProtocolLibHandler protocolLibHandler;
-	public EventListener eventListener;
+	public WorldGuardHandler worldGuardHandler = null;
+	public ProtocolLibHandler protocolLibHandler = null;
+	public EventListener eventListener = null;
+	public AutoUpdater autoUpdater = null;
 	public String slot = "0";
 	
 	public void onEnable() {
@@ -38,7 +38,7 @@ public class CompassNavigation extends JavaPlugin {
         
         try {
         	if ((getConfig().getBoolean("AutoUpdater")) && (!getDescription().getVersion().contains("SNAPSHOT"))) {
-        		new AutoUpdater(this);
+        		autoUpdater = new AutoUpdater(this);
         	}
 		} catch (Exception e) {}
         
@@ -48,7 +48,6 @@ public class CompassNavigation extends JavaPlugin {
 		
 		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
 			prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("Prefix") + " ");
-			consolePrefix = ChatColor.stripColor(prefix);
 		}
 	}
 	
@@ -75,46 +74,46 @@ public class CompassNavigation extends JavaPlugin {
 		}
 	}
 	
-	public void sendHelpMessage(CommandSender sender) {
+	public void send(CommandSender sender, String message) {
 		if (sender instanceof Player) {
-			sender.sendMessage("§6§lCOMPASSNAV§f | §7/compassnav help");
-			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
-			sender.sendMessage("§2/compassnav help§a - Get command help");
-			sender.sendMessage("§2/compassnav reload§a - Reload the plugin");
-			sender.sendMessage("§2/compassnav setup§a - Set up compass inventory slots");
-			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 		} else {
-			getLogger().info("COMPASSNAV | /compassnav help");
-			getLogger().info("Oo-----------------------oOo-----------------------oO");
-			getLogger().info("/compassnav help - Get command help");
-			getLogger().info("/compassnav reload - Reload the plugin");
-			getLogger().info("/compassnav setup - Set up compass inventory slots");
-			getLogger().info("Oo-----------------------oOo-----------------------oO");
+			getLogger().info(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message)));
 		}
+	}
+	
+	public void sendHelpMessage(CommandSender sender) {
+		send(sender, "§6§lCOMPASSNAV§f | §7/compassnav help");
+		send(sender, "§6Oo-----------------------oOo-----------------------oO");
+		send(sender, "§2/compassnav help§a - Get command help");
+		send(sender, "§2/compassnav reload§a - Reload the plugin");
+		send(sender, "§2/compassnav update§a - Check for updates");
+		send(sender, "§2/compassnav setup§a - Set up compass inventory slots");
+		send(sender, "§6Oo-----------------------oOo-----------------------oO");
 	}
 		
 	public void sendSetupMessage(CommandSender sender, String slot) {
 		if (sender.hasPermission("compassnav.admin.setup")) {
-			sender.sendMessage("§6§lSETUP§f | §7/compassnav setup");
-			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+			send(sender, "§6§lSETUP§f | §7/compassnav setup");
+			send(sender, "§6Oo-----------------------oOo-----------------------oO");
 			if (!slot.equals("0")) {
-				sender.sendMessage("§aYou are now setting up slot " + slot + ".");
+				send(sender, "§aYou are now setting up slot " + slot + ".");
 			}
-			sender.sendMessage("§2/compassnav setup loc§a - Sets location");
-			sender.sendMessage("§2/compassnav setup bungee <server>§a - Sets BungeeCord server");
-			sender.sendMessage("§2/compassnav setup lilypad <server>§a - Sets Lilypad server");
-			sender.sendMessage("§2/compassnav setup warp <warp>§a - Sets Essentials warp");
-			sender.sendMessage("§2/compassnav setup item§a - Sets item from hand");
-			sender.sendMessage("§2/compassnav setup name <name>§a - Sets item name");
-			sender.sendMessage("§2/compassnav setup lore [number] <lore>§a - Sets item lore");
-			sender.sendMessage("§2/compassnav setup price <price>§a - Sets the price of using the item");
-			sender.sendMessage("§2/compassnav setup amount <amount>§a - Sets item amount");
-			sender.sendMessage("§2/compassnav setup command <command>§a - Sets the executable command");
-			sender.sendMessage("§2/compassnav setup enchant§a - Toggles enchanted status");
-			sender.sendMessage("§2/compassnav setup enable§a - Enables slot");
-			sender.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+			send(sender, "§2/compassnav setup loc§a - Sets location");
+			send(sender, "§2/compassnav setup bungee <server>§a - Sets BungeeCord server");
+			send(sender, "§2/compassnav setup lilypad <server>§a - Sets Lilypad server");
+			send(sender, "§2/compassnav setup warp <warp>§a - Sets Essentials warp");
+			send(sender, "§2/compassnav setup item§a - Sets item from hand");
+			send(sender, "§2/compassnav setup name <name>§a - Sets item name");
+			send(sender, "§2/compassnav setup lore [number] <lore>§a - Sets item lore");
+			send(sender, "§2/compassnav setup price <price>§a - Sets the price of using the item");
+			send(sender, "§2/compassnav setup amount <amount>§a - Sets item amount");
+			send(sender, "§2/compassnav setup command <command>§a - Sets the executable command");
+			send(sender, "§2/compassnav setup enchant§a - Toggles enchanted status");
+			send(sender, "§2/compassnav setup enable§a - Enables slot");
+			send(sender, "§6Oo-----------------------oOo-----------------------oO");
 		} else {
-			sender.sendMessage("§4You do not have access to that command.");
+			send(sender, "§4You do not have access to that command.");
 		}
 	}
 	
@@ -152,32 +151,40 @@ public class CompassNavigation extends JavaPlugin {
     			sendHelpMessage(sender);
     		} else if (args.length == 1) {
     			if (args[0].equalsIgnoreCase("reload")) {
-    				if (sender instanceof Player) {
-    					Player player = (Player) sender;
-    					if (player.hasPermission("compassnav.admin.reload")) {
-    						reloadConfig();
-    						player.sendMessage(prefix + "§6CompassNavigation reloaded!");;
-				    	} else {
-				    		player.sendMessage("§4You do not have access to that command.");
-				    	}
-    				} else {
+    				if (sender.hasPermission("compassnav.admin.reload")) {
     					reloadConfig();
-    					getLogger().info(consolePrefix + "CompassNavigation reloaded!");
+    					send(sender, prefix + "§6CompassNavigation reloaded!");;
+				   	} else {
+				   		send(sender, "§4You do not have access to that command.");
+				   	}
+    			} else if (args[0].equalsIgnoreCase("update")) {
+    				if (sender.hasPermission("compassnav.admin.update")) {
+	    				if (autoUpdater != null) {
+		    				if (autoUpdater.updatesAvailable()) {
+		    					send(sender, prefix + "§6There is a new update for CompassNavigation! Update version: §ev" + autoUpdater.newVersion + "§6, current version: §ev" + autoUpdater.currentVersion);
+		    				} else {
+		    					send(sender, prefix + "§6No updates found for CompassNavigation.");
+		    				}
+	    				} else {
+	    					send(sender, prefix + "§6Couldn't search for updates because the autoupdater is disabled.");
+	    				}
+    				} else {
+    					send(sender, "§4You do not have access to that command.");
     				}
     			} else if (args[0].equalsIgnoreCase("setup")) {
     				if (sender instanceof Player) {
     					Player player = (Player) sender;
     					if (player.hasPermission("compassnav.admin.setup")) {
-    						player.sendMessage("§6§lSETUP§f | §7/compassnav setup");
-    						player.sendMessage("§6Oo-----------------------oOo-----------------------oO");
-							player.sendMessage("§aPlease specify a slot number.");
-							player.sendMessage("§2Usage:§a /compassnav setup <1>");
-							player.sendMessage("§6Oo-----------------------oOo-----------------------oO");
+    						send(player, "§6§lSETUP§f | §7/compassnav setup");
+    						send(player, "§6Oo-----------------------oOo-----------------------oO");
+							send(player, "§aPlease specify a slot number.");
+							send(player, "§2Usage:§a /compassnav setup <1>");
+							send(player, "§6Oo-----------------------oOo-----------------------oO");
     					} else {
-    						player.sendMessage("§4You do not have access to that command.");
+    						send(player, "§4You do not have access to that command.");
     					}
     				} else {
-    					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+    					send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
     				}
     			} else {
     				sendHelpMessage(sender);
@@ -200,72 +207,72 @@ public class CompassNavigation extends JavaPlugin {
 									getConfig().set(slot + ".Z", player.getLocation().getZ());
 									getConfig().set(slot + ".Yaw", player.getLocation().getYaw());
 									getConfig().set(slot + ".Pitch", player.getLocation().getPitch());
-									player.sendMessage(prefix + "§6Location set for slot " + slot + "!");
+									send(player, prefix + "§6Location set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("item")) {
 									getConfig().set(slot + ".Item", player.getItemInHand().getTypeId() + ":" + player.getItemInHand().getDurability());
-									player.sendMessage(prefix + "§6Item set for slot " + slot + "!");
+									send(player, prefix + "§6Item set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("enable")) {
 									if (getConfig().contains(slot + ".Enabled")) {
 										if (getConfig().getBoolean(slot + ".Enabled") == true) {
-											player.sendMessage(prefix + "§6Disabled slot " + slot + ".");
+											send(player, prefix + "§6Disabled slot " + slot + ".");
 											getConfig().set(slot + ".Enabled", false);
 										} else {
-											player.sendMessage(prefix + "§6Enabled slot " + slot + ".");
+											send(player, prefix + "§6Enabled slot " + slot + ".");
 											getConfig().set(slot + ".Enabled", true);
 										}
 									} else {
-										player.sendMessage(prefix + "§6Enabled slot " + slot + ".");
+										send(player, prefix + "§6Enabled slot " + slot + ".");
 										getConfig().set(slot + ".Enabled", true);
 									}
 								} else if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", null);
-									player.sendMessage(prefix + "§6Bungee unset for slot " + slot + "!");
+									send(player, prefix + "§6Bungee unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("lilypad")) {
 									getConfig().set(slot + ".Lilypad", null);
-									player.sendMessage(prefix + "§6Lilypad unset for slot " + slot + "!");
+									send(player, prefix + "§6Lilypad unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("lore")) {
 									getConfig().set(slot + ".Lore", null);
-									player.sendMessage(prefix + "§6Lore unset for slot " + slot + "!");
+									send(player, prefix + "§6Lore unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", null);
-									player.sendMessage(prefix + "§6Warp unset for slot " + slot + "!");
+									send(player, prefix + "§6Warp unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("price")) {
 									getConfig().set(slot + ".Price", null);
-									player.sendMessage(prefix + "§6Price unset for slot " + slot + "!");
+									send(player, prefix + "§6Price unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("amount")) {
 									getConfig().set(slot + ".Amount", null);
-									player.sendMessage(prefix + "§6Amount unset for slot " + slot + "!");
+									send(player, prefix + "§6Amount unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("enchant")) {
 									if (getConfig().contains(slot + ".Enchant")) {
 										if (getConfig().getBoolean(slot + ".Enchant") == true) {
-											player.sendMessage(prefix + "§6Removed enchant from slot " + slot + ".");
+											send(player, prefix + "§6Removed enchant from slot " + slot + ".");
 											getConfig().set(slot + ".Enchant", null);
 										} else {
-											player.sendMessage(prefix + "§6Added enchant to slot " + slot + ".");
+											send(player, prefix + "§6Added enchant to slot " + slot + ".");
 											getConfig().set(slot + ".Enchant", true);
 										}
 									} else {
-										player.sendMessage(prefix + "§6Added enchant to slot " + slot + ".");
+										send(player, prefix + "§6Added enchant to slot " + slot + ".");
 										getConfig().set(slot + ".Enchant", true);
 									}
 								} else if (args[1].equalsIgnoreCase("command")) {
 									getConfig().set(slot + ".Command", null);
-									player.sendMessage(prefix + "§6Command unset for slot " + slot + ".");
+									send(player, prefix + "§6Command unset for slot " + slot + ".");
 								} else {
 									sendSetupMessage(player, slot);
 								}
 								saveConfig();
 							} else {
-								player.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+								send(player, prefix + "§6You haven't specified a slot to modify.");
 							}
 						} else {
-							player.sendMessage("§4You do not have access to that command.");
+							send(player, "§4You do not have access to that command.");
 						}
 					} else {
-						sendHelpMessage((Player) sender);
+						sendHelpMessage(sender);
 					}
 				} else {
-					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+					send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
 				}
 			} else if (args.length >= 3) {
 				if (sender instanceof Player) {
@@ -275,13 +282,13 @@ public class CompassNavigation extends JavaPlugin {
 							if (args[0].equalsIgnoreCase("setup")) {
 								if (args[1].equalsIgnoreCase("bungee")) {
 									getConfig().set(slot + ".Bungee", handleString(args));
-									player.sendMessage(prefix + "§6Bungee set for slot " + slot + "!");
+									send(player, prefix + "§6Bungee set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("lilypad")) {
 									getConfig().set(slot + ".Lilypad", handleString(args));
-									player.sendMessage(prefix + "§6Lilypad set for slot " + slot + "!");
+									send(player, prefix + "§6Lilypad set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("name")) {
 									getConfig().set(slot + ".Name", handleString(args));
-									player.sendMessage(prefix + "§6Name set for slot " + slot + "!");
+									send(player, prefix + "§6Name set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("lore")) {
 									List<String> loreList = new CopyOnWriteArrayList<String>();
 									if (args.length >= 4) {
@@ -310,19 +317,19 @@ public class CompassNavigation extends JavaPlugin {
 										loreList.add(loreString);
 										getConfig().set(slot + ".Lore", loreList);
 									}
-									player.sendMessage(prefix + "§6Lore set for slot " + slot + "!");
+									send(player, prefix + "§6Lore set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("warp")) {
 									getConfig().set(slot + ".Warp", handleString(args));
-									player.sendMessage(prefix + "§6Warp set for slot " + slot + "!");
+									send(player, prefix + "§6Warp set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("price")) {
 									getConfig().set(slot + ".Price", Double.parseDouble(handleString(args)));
-									player.sendMessage(prefix + "§6Price set for slot " + slot + "!");
+									send(player, prefix + "§6Price set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("amount")) {
 									getConfig().set(slot + ".Amount", Integer.parseInt(handleString(args)));
-									player.sendMessage(prefix + "§6Amount set for slot " + slot + "!");
+									send(player, prefix + "§6Amount set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("command")) {
 									getConfig().set(slot + ".Command", handleString(args));
-									player.sendMessage(prefix + "§6Command set for slot " + slot + "!");
+									send(player, prefix + "§6Command set for slot " + slot + "!");
 								} else {
 									sendSetupMessage(player, slot);
 								}
@@ -331,13 +338,13 @@ public class CompassNavigation extends JavaPlugin {
 								sendHelpMessage(player);
 							}
 						} else {
-							player.sendMessage(prefix + "§6You haven't specified a slot to modify.");
+							send(player, prefix + "§6You haven't specified a slot to modify.");
 						}
 					} else {
-						player.sendMessage("§4You do not have access to that command.");
+						send(player, "§4You do not have access to that command.");
 					}
 				} else {
-					getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+					send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
 				}
 			}
     	} else if (cmd.getName().equalsIgnoreCase(getConfig().getString("CommandName"))) {
@@ -345,17 +352,17 @@ public class CompassNavigation extends JavaPlugin {
 				Player player = (Player) sender;
     			if (player.hasPermission("compassnav.use")) {
     				if (getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-    					player.sendMessage(prefix + "§6You can't teleport from this world!");
+    					send(player, prefix + "§6You can't teleport from this world!");
     				} else if (!canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-    					player.sendMessage(prefix + "§6You can't teleport in this region!");
+    					send(player, prefix + "§6You can't teleport in this region!");
     				} else {
     					eventListener.openInventory(player);
     				}
     			} else {
-    				player.sendMessage("§4You do not have access to that command.");
+    				send(player, "§4You do not have access to that command.");
     			}
     		} else {
-    			getLogger().info(consolePrefix + "Sorry, but consoles can't execute this command.");
+    			send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
     		}
     	} else {
     		sendHelpMessage(sender);

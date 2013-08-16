@@ -40,7 +40,7 @@ public class AutoUpdater implements Listener {
   			streamReader.close();
   			connection.disconnect();
   		} catch (Exception e) {
-  			plugin.getLogger().info(plugin.consolePrefix + "Couldn't run AutoUpdater. Network offline?");
+  			plugin.send(plugin.getServer().getConsoleSender(), plugin.prefix + "Couldn't run AutoUpdater. Network offline?");
   		}
   		return false;
   	}

@@ -120,10 +120,10 @@ public class EventListener implements Listener {
 					if (!player.hasPermission("compassnav.perks.free." + slot)) {
 						if (vault.hasEnough(name, price)) {
 							vault.subtract(name, price);
-							player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
+							plugin.send(player, plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
 							checkBungee(player, slot);
 						} else {
-							player.sendMessage(plugin.prefix + "§6You do not have enough money!");
+							plugin.send(player, plugin.prefix + "§6You do not have enough money!");
 							player.closeInventory();
 						}
 					} else {
@@ -263,9 +263,9 @@ public class EventListener implements Listener {
 		    if ((player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData() == getDamage(plugin.getConfig().getString("Item"))))) {
 		    	if (player.hasPermission("compassnav.use")) {
 					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-		    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
+		    			plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
 		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-		    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+		    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
 		    			openInventory(player);
 		    			event.setCancelled(true);
@@ -312,9 +312,9 @@ public class EventListener implements Listener {
 				        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
 				        	Player player = (Player) event.getPlayer();
 							if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-				    			player.sendMessage(plugin.prefix + "§6You can't teleport from this world!");
+				    			plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
 				    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-				    			player.sendMessage(plugin.prefix + "§6You can't teleport in this region!");
+				    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 				    		} else {
 				    			openInventory(player);
 				    		}
@@ -333,10 +333,10 @@ public class EventListener implements Listener {
 			if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))))) {
 				if (event.getPlayer().hasPermission("compassnav.admin.sign.create")) {
 					event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
-					event.getPlayer().sendMessage(plugin.prefix + "§6Succesfully created a Teleport sign!");
+					plugin.send(event.getPlayer(), plugin.prefix + "§6Succesfully created a Teleport sign!");
 				} else {
 					event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("NoPermSignName")));
-					event.getPlayer().sendMessage(plugin.prefix + "§6You do not have permission to create a Teleport sign.");
+					plugin.send(event.getPlayer(), plugin.prefix + "§6You do not have permission to create a Teleport sign.");
 				}
 			}
 		} catch (Exception e) {}
