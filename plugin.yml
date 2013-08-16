@@ -3,7 +3,7 @@ version: 1.7-SNAPSHOT
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
 website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
-authors: [xMRKIRO, Adzwooly]
+authors: [DenialMC, Adzwooly]
 softdepend: [Essentials, WorldEdit, WorldGuard, Vault, ProtocolLib]
 commands:
   compassnav:

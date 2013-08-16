@@ -20,9 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -32,12 +30,12 @@ public class EventListener implements Listener {
 	public CompassNavigation plugin;
     public Inventory chest;
     public List<String> lore = new CopyOnWriteArrayList<String>();
-    public ItemStack compassItem;
-    public List<Player> giveCompassBack = new CopyOnWriteArrayList<Player>();
     public String title = "CompassNavigation";
+    public VaultHandler vault;
     
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
+    	this.vault = new VaultHandler(plugin);
     }
     
     public boolean sectionExists(int slot, String path) {
@@ -61,47 +59,44 @@ public class EventListener implements Listener {
     }
 	
     public void handleSlot(Player player, int slot, Inventory chest) {
-    	if (sectionExists(slot, ".Enabled")) {
-    		if (plugin.getConfig().getBoolean(slot + ".Enabled") == true) {
-    			lore.clear();
-    			String Name = null;
-    			if (sectionExists(slot, ".Name")) {
-    				Name = "§r" + ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
-    			}
-    			String Item = plugin.getConfig().getString(slot + ".Item");
-    			int Amount = 1;
-    			int ID = getID(Item);
-    			short Damage = getDamage(Item);
-    			if (sectionExists(slot, ".Amount")) {
-    				if ((plugin.getConfig().getInt(slot + ".Amount") <= 64) && (plugin.getConfig().getInt(slot + ".Amount") >= 1)) {
-    					Amount = plugin.getConfig().getInt(slot + ".Amount");
-    				}
-    			}
-				if (sectionExists(slot, ".Lore")) {
-					for (String loreLine : plugin.getConfig().getStringList(slot + ".Lore")) {
-						lore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
-					}
-				}
-				ItemStack stack = new ItemStack(ID, Amount, Damage);
-				if (sectionExists(slot, ".Enchanted")) {
-					if ((plugin.getConfig().getBoolean(slot + ".Enchanted") == true) && (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib"))) {
-						stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1337);
-					}
-				}
-				if (!player.hasPermission("compassnav.perks.free")) {
-					if (!player.hasPermission("compassnav.perks.free." + slot)) {
-						if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
-							if (sectionExists(slot, ".Price")) {
-								lore.add("§2Price: §a$" + plugin.getConfig().getDouble(slot + ".Price"));
-							}
+    	if (plugin.getConfig().getBoolean(slot + ".Enabled", false)) {
+    		lore.clear();
+    		String Name = null;
+    		
+    		if (sectionExists(slot, ".Name")) {
+    			Name = "§r" + ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(slot + ".Name"));
+    		}
+    		
+    		String Item = plugin.getConfig().getString(slot + ".Item", "2");
+    		int Amount = plugin.getConfig().getInt(slot + ".Amount", 1);
+    		int ID = getID(Item);
+    		short Damage = getDamage(Item);
+    		
+			for (String loreLine : plugin.getConfig().getStringList(slot + ".Lore")) {
+				lore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
+			}
+		
+			ItemStack stack = new ItemStack(ID, Amount, Damage);
+			
+			if ((plugin.getConfig().getBoolean(slot + ".Enchanted", false)) && (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib"))) {
+				stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1337);
+			}
+			
+			if (!player.hasPermission("compassnav.perks.free")) {
+				if (!player.hasPermission("compassnav.perks.free." + slot)) {
+					if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
+						if (sectionExists(slot, ".Price")) {
+							lore.add("§2Price: §a$" + plugin.getConfig().getDouble(slot + ".Price"));
 						}
 					}
 				}
-				if (!(player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.hasPermission("compassnav.*")))) {
-					lore.add("§4No permission");
-				}
-				chest.setItem(slot - 1, setName(stack, Name, lore));
-    		}
+			}
+			
+			if (!(player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.hasPermission("compassnav.*")))) {
+				lore.add("§4No permission");
+			}
+			
+			chest.setItem(slot - 1, setName(stack, Name, lore));
     	}
     }
     
@@ -123,8 +118,8 @@ public class EventListener implements Listener {
 			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
 				if (!player.hasPermission("compassnav.perks.free")) {
 					if (!player.hasPermission("compassnav.perks.free." + slot)) {
-						if (plugin.getVault().hasEnough(name, price)) {
-							plugin.getVault().subtract(name, price);
+						if (vault.hasEnough(name, price)) {
+							vault.subtract(name, price);
 							player.sendMessage(plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
 							checkBungee(player, slot);
 						} else {
@@ -155,8 +150,6 @@ public class EventListener implements Listener {
     	}
 		if (sectionExists(slot, ".Bungee")) {
 			try {
-				Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
-            
 				ByteArrayOutputStream b = new ByteArrayOutputStream();
 				DataOutputStream out = new DataOutputStream(b);
 				out.writeUTF("Connect");
@@ -174,14 +167,14 @@ public class EventListener implements Listener {
     public void checkLilypad(Player player, int slot) {
     	if (sectionExists(slot, ".Lilypad")) {
     		try {
-    			Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
-    			Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
-    			Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
-    			Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
-    			Method connection = connectClass.getDeclaredMethod("request", requestClass);
-    			
-    			Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
-    			connection.invoke(connect, request);
+	    		Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
+	    		Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
+	    		Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
+	    		Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
+	    		Method connection = connectClass.getDeclaredMethod("request", requestClass);
+	    		
+	    		Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
+	    		connection.invoke(connect, request);
     		} catch (Exception e) {
     			checkWarp(player, slot);
     		}
@@ -222,46 +215,40 @@ public class EventListener implements Listener {
     	if (plugin.getConfig().getBoolean("Sounds")) {
     		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     	}
+    	
     	title = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"));
 		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), title);
 		
-		int[] row1 = {1,2,3,4,5,6,7,8,9};
-		int[] row2 = {10,11,12,13,14,15,16,17,18};
-		int[] row3 = {19,20,21,22,23,24,25,26,27};
-		int[] row4 = {28,29,30,31,32,33,34,35,36};
-		int[] row5 = {37,38,39,40,41,42,43,44,45};
-		int[] row6 = {46,47,48,49,50,51,52,53,54};
-				
-		for (int slot : row1) {
+		for (int slot = 0; slot < 9; slot++) {
 			handleSlot(player, slot, chest);
 		}
 	
 		if (plugin.getConfig().getInt("Rows") >= 2) {	
-			for (int slot : row2) {
+			for (int slot = 9; slot < 18; slot++) {
 				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 3) {	
-			for (int slot : row3) {
+			for (int slot = 18; slot < 27; slot++) {
 				handleSlot(player, slot, chest);
 			}
 		}
 	
 		if (plugin.getConfig().getInt("Rows") >= 4) {	
-			for (int slot : row4) {
+			for (int slot = 27; slot < 36; slot++) {
 				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 5) {	
-			for (int slot : row5) {
+			for (int slot = 36; slot < 45; slot++) {
 				handleSlot(player, slot, chest);
 			}
 		}
 		
 		if (plugin.getConfig().getInt("Rows") >= 6) {	
-			for (int slot : row6) {
+			for (int slot = 45; slot < 54; slot++) {
 				handleSlot(player, slot, chest);
 			}
 		}
@@ -289,12 +276,11 @@ public class EventListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onInventoryInteract(InventoryClickEvent e) {
-		Player player = (Player) e.getWhoClicked();
-		if (e.getInventory().getTitle().equals(title)) {
-			int[] rows = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
-			for (int slot : rows) {
-				if (e.getRawSlot() == slot - 1) {
+	public void onInventoryInteract(InventoryClickEvent event) {
+		Player player = (Player) event.getWhoClicked();
+		if (event.getInventory().getTitle().equals(title)) {
+			for (int slot = 0; slot < 54; slot++) {
+				if (event.getRawSlot() == slot - 1) {
 					if (sectionExists(slot, ".Enabled")) {
 						if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
 							if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
@@ -307,7 +293,7 @@ public class EventListener implements Listener {
 									player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 								}
 							}
-							e.setCancelled(true);
+							event.setCancelled(true);
 						}
 					}
 				}
@@ -354,61 +340,6 @@ public class EventListener implements Listener {
 				}
 			}
 		} catch (Exception e) {}
-	}
-	
-	public void setCompassItem() {
-		lore.clear();
-		String Name = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("CompassName"));
-		String Item = plugin.getConfig().getString("Item");
-		int ID = getID(Item);
-		short Damage = getDamage(Item);
-		for (String iLore : plugin.getConfig().getStringList("CompassLore")) {
-			lore.add(ChatColor.translateAlternateColorCodes('&', iLore));
-		}
-		compassItem = setName(new ItemStack(ID, 1, Damage), Name, lore);
-	}
-	
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
-			if ((!plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName())) || (player.hasPermission("compassnav.perks.use.world"))) {
-    			if ((plugin.canUseCompassHere(player.getLocation())) || (player.hasPermission("compassnav.perks.use.region"))) {
-					if (!player.getInventory().contains(compassItem)) {
-						player.getInventory().addItem(compassItem);
-					}
-    			}
-			}
-		}
-		if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-			if (player.getInventory().contains(compassItem)) {
-				player.getInventory().remove(compassItem);
-				giveCompassBack.add(player);
-			}
-		}
-		if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-			if (player.getInventory().contains(compassItem)) {
-				player.getInventory().remove(compassItem);
-				giveCompassBack.add(player);
-			}
-		}
-		if (giveCompassBack.contains(player)) {
-			if (!player.getInventory().contains(compassItem)) {
-				player.getInventory().addItem(compassItem);
-				giveCompassBack.remove(player);
-			}
-		}
-	}
-	
-	@EventHandler
-	public void onItemDrop(PlayerDropItemEvent event) {
-		Player player = event.getPlayer();
-		if (plugin.getConfig().getStringList("MustHaveCompassWorlds").contains(player.getWorld().getName())) {
-			if (event.getItemDrop().getItemStack().getTypeId() == plugin.getConfig().getInt("Item")) {
-				player.sendMessage(plugin.prefix + "§6You can't drop your compass here!");
-				event.setCancelled(true);
-			}
-		}
 	}
 	
 	public ItemStack setName(ItemStack items, String name, List<String> lore) {

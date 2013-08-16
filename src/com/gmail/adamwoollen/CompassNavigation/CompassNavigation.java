@@ -3,15 +3,11 @@ package com.gmail.adamwoollen.CompassNavigation;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import net.milkbowl.vault.economy.Economy;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CompassNavigation extends JavaPlugin {
@@ -21,12 +17,10 @@ public class CompassNavigation extends JavaPlugin {
 	public WorldGuardHandler worldGuardHandler;
 	public ProtocolLibHandler protocolLibHandler;
 	public EventListener eventListener;
-	public Metrics metrics;
 	public String slot = "0";
 	
 	public void onEnable() {
 		getConfig().options().copyDefaults(true);
-        getWorldGuard();
         
         migrateToList();
         migrateFromDesc();
@@ -38,12 +32,9 @@ public class CompassNavigation extends JavaPlugin {
         	protocolLibHandler.initializeListener();
         }
         
-        try {
-        	if (getConfig().getBoolean("Metrics")) {
-        		metrics = new Metrics(this);
-        		metrics.start();
-        	}
-        } catch (Exception e) {}
+        if (getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+        	worldGuardHandler = new WorldGuardHandler(this);
+        }
         
         try {
         	if ((getConfig().getBoolean("AutoUpdater")) && (!getDescription().getVersion().contains("SNAPSHOT"))) {
@@ -52,7 +43,7 @@ public class CompassNavigation extends JavaPlugin {
 		} catch (Exception e) {}
         
         eventListener = new EventListener(this);
-        eventListener.setCompassItem();
+
 		getServer().getPluginManager().registerEvents(eventListener, this);
 		
 		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
@@ -62,9 +53,7 @@ public class CompassNavigation extends JavaPlugin {
 	}
 	
 	public void migrateToList() {
-		int[] numbers = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
-		
-		for (int number : numbers) {
+		for (int number = 0; number < 54; number++) {
 			if (getConfig().contains(number + ".Desc")) {
 				if (getConfig().isString(number + ".Desc")) {
 					List<String> newLore = new CopyOnWriteArrayList<String>();
@@ -77,20 +66,12 @@ public class CompassNavigation extends JavaPlugin {
 	}
 	
 	public void migrateFromDesc() {
-		int[] numbers = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54};
-		
-		for (int number : numbers) {
+		for (int number = 0; number < 54; number++) {
 			if (getConfig().contains(number + ".Desc")) {
 				List<String> newLore = getConfig().getStringList(number + ".Desc");
 				getConfig().set(number + ".Lore", newLore);
 				getConfig().set(number + ".Desc", null);
 			}
-		}
-		
-		if (getConfig().contains("CompassDesc")) {
-			List<String> newLore = getConfig().getStringList("CompassDesc");
-			getConfig().set("CompassLore", newLore);
-			getConfig().set("CompassDesc", null);
 		}
 	}
 	
@@ -149,24 +130,6 @@ public class CompassNavigation extends JavaPlugin {
 		return (worldGuardHandler == null) ? true : worldGuardHandler.canUseCompassHere(location);
 	}
 	
-	public void getWorldGuard() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-		if (plugin != null) {
-			worldGuardHandler = new WorldGuardHandler((com.sk89q.worldguard.bukkit.WorldGuardPlugin) plugin);
-		}
-	}
-	
-	public VaultHandler getVault() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("Vault");
-		if (plugin != null) {
-			RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
-			if (rsp != null) {
-				return new VaultHandler(rsp.getProvider());
-			}
-		}
-		return null;
-	}
-	
     public boolean sectionExists(String slot, String path) {
     	if (getConfig().contains(slot + path)) {
     		return true;
@@ -193,14 +156,12 @@ public class CompassNavigation extends JavaPlugin {
     					Player player = (Player) sender;
     					if (player.hasPermission("compassnav.admin.reload")) {
     						reloadConfig();
-    						eventListener.setCompassItem();
     						player.sendMessage(prefix + "§6CompassNavigation reloaded!");;
 				    	} else {
 				    		player.sendMessage("§4You do not have access to that command.");
 				    	}
     				} else {
     					reloadConfig();
-    					eventListener.setCompassItem();
     					getLogger().info(consolePrefix + "CompassNavigation reloaded!");
     				}
     			} else if (args[0].equalsIgnoreCase("setup")) {

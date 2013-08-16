@@ -1,20 +1,25 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
+import org.bukkit.plugin.RegisteredServiceProvider;
+
 import net.milkbowl.vault.economy.Economy;
 
 public class VaultHandler {
 
-	public Economy vaultPlugin;
+	public Economy economy;
 
-	public VaultHandler(Economy vaultPlugin) {
-		this.vaultPlugin = vaultPlugin;
+	public VaultHandler(CompassNavigation plugin) {
+        RegisteredServiceProvider<Economy> economyProvider = plugin.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
 	}
 
 	public void subtract(String player, double amount) {
-		vaultPlugin.withdrawPlayer(player, amount);
+		economy.withdrawPlayer(player, amount);
 	}
 
 	public boolean hasEnough(String player, double amount) {
-		return vaultPlugin.has(player, amount);
+		return economy.has(player, amount);
 	}
 }
