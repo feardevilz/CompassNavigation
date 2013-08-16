@@ -23,7 +23,7 @@ public class AutoUpdater implements Listener {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
   	}
   
-  	public boolean updatesAvailable(Player player) {
+  	public boolean updatesAvailable() {
   		try {
   			URL url = new URL("http://api.bukget.org/api2/bukkit/plugin/compass-navigation/latest");
   			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -40,7 +40,7 @@ public class AutoUpdater implements Listener {
   			streamReader.close();
   			connection.disconnect();
   		} catch (Exception e) {
-  			plugin.getLogger().info(plugin.consolePrefix + "Couldn't run AutoUpdater for player " + player.getName() + ".");
+  			plugin.getLogger().info(plugin.consolePrefix + "Couldn't run AutoUpdater. Network offline?");
   		}
   		return false;
   	}
@@ -50,7 +50,7 @@ public class AutoUpdater implements Listener {
   		Player player = event.getPlayer();
   		
   		if (player.hasPermission("compassnav.admin.update")) {
-  			if (updatesAvailable(player)) {
+  			if (updatesAvailable()) {
   				player.sendMessage("§b[CompassNavigation] §rCompassNavigation v" + newVersion + " is now available!");
   				player.sendMessage("Your version: v" + currentVersion);
   			}
