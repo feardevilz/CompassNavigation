@@ -188,9 +188,13 @@ public class EventListener implements Listener {
     
     public void checkWarp(Player player, int slot) {
     	if (sectionExists(slot, ".Warp")) {
-    		Location loc = plugin.essentialsHandler.getWarp(player, plugin.getConfig().getString(slot + ".Warp"));
-    		if (loc != null) {
-    			player.teleport(loc);
+    		if (plugin.essentialsHandler != null) {
+	    		Location loc = plugin.essentialsHandler.getWarp(player, plugin.getConfig().getString(slot + ".Warp"));
+	    		if (loc != null) {
+	    			player.teleport(loc);
+	    		} else {
+	    			checkCoords(player, slot);
+	    		}
     		} else {
     			checkCoords(player, slot);
     		}
