@@ -33,7 +33,7 @@
 		</resources>
 	</build>
 
-	<version>1.0</version>
+	<version>1.7</version>
 
 
 	<repositories>
@@ -56,42 +56,49 @@
   	<dependency>
   		<groupId>org.bukkit</groupId>
   		<artifactId>bukkit</artifactId>
-  		<version>1.6.2-R0.1-SNAPSHOT</version>
+  		<version>1.6.2-R0.2-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>com.sk89q</groupId>
   		<artifactId>WorldGuard</artifactId>
-  		<version>5.7.3</version>
+  		<version>5.8.1</version>
   		<scope>system</scope>
   		<systemPath>${project.basedir}/WorldGuard.jar</systemPath>
   	</dependency>
   	<dependency>
   		<groupId>com.sk89q</groupId>
   		<artifactId>WorldEdit</artifactId>
-  		<version>5.5.6</version>
+  		<version>5.5.8</version>
   		<scope>system</scope>
   		<systemPath>${project.basedir}/WorldEdit.jar</systemPath>
   	</dependency>
   	<dependency>
   		<groupId>net.milkbowl</groupId>
   		<artifactId>Vault</artifactId>
-  		<version>1.2.26</version>
+  		<version>1.2.25</version>
   		<scope>system</scope>
   		<systemPath>${project.basedir}/Vault.jar</systemPath>
   	</dependency>
   	<dependency>
   		<groupId>com.comphenix</groupId>
   		<artifactId>ProtocolLib</artifactId>
-  		<version>2.4.8</version>
+  		<version>2.7.0</version>
   		<scope>system</scope>
   		<systemPath>${project.basedir}/ProtocolLib.jar</systemPath>
   	</dependency>
     <dependency>
 	    <groupId>lilypad.bukkit</groupId>
       <artifactId>Bukkit-Connect</artifactId>
-      <version>23</version>
+      <version>35</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/Bukkit-Connect.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.earth2me</groupId>
+      <artifactId>Essentials</artifactId>
+      <version>Dev2.12.103</version>
+      <scope>syste</scope>
+      <systemPath> ${project.basedir}/Essentials.jar</systemPath>
     </dependency>
 	</dependencies>
 	

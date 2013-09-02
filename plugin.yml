@@ -1,5 +1,5 @@
 name: CompassNavigation
-version: 1.7-SNAPSHOT
+version: 1.7
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
 website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
@@ -72,9 +72,13 @@ permissions:
     children:
       compassnav.perks.use.world: true
       compassnav.perks.use.region: true
+      compassnav.perks.cooldownprevent: true
   compassnav.perks.use.world:
     description: Allows you to use the compass in disabled worlds.
     default: op
   compassnav.perks.use.region:
     description: Allows you to use the compass in WorldGuard regions with compasses disabled.
+    default: op
+  compassnav.perks.cooldownprevent:
+    description: Prevents the cooldown when teleporting near a player
     default: op

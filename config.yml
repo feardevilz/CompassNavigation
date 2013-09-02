@@ -18,6 +18,7 @@
 # You can specify enchanted status with the Enchanted option (true or false).
 # You can specify commands to run with the Command option (Don't include the first slash). To run a console command just write "c:" before the command itself. Use those modifiers: <name>, <displayname>, <x>, <y>, <z>, <yaw>, <pitch>.
 # Set up slots ingame with /cn setup!
+# You can disable the pvp warmup time with WarmupTime, increase the distance checked with WarmupDistance and the time to pass with WarmupDelay.
 # Don't forget to add items to the config!
 
 Item: 345
@@ -29,6 +30,9 @@ NoPermSignName: '&4[Teleport]'
 CommandName: 'compass'
 AutoUpdater: true
 Sounds: true
+WarmupTime: true
+WarmupDistance: 15
+WarmupDelay: 5
 DisabledWorlds:
   - example1
   - example2

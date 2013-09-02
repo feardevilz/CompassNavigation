@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -33,6 +35,7 @@ public class EventListener implements Listener {
 	public CompassNavigation plugin;
     public String title = "CompassNavigation";
     public VaultHandler vault;
+    public HashMap<String, WarmupTimer> timers = new HashMap<String, WarmupTimer>();
     
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
@@ -80,7 +83,7 @@ public class EventListener implements Listener {
 			ItemStack stack = new ItemStack(ID, Amount, Damage);
 			
 			if (plugin.getConfig().getBoolean(slot + ".Enchanted", false) && plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-				stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1337);
+				stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 4);
 			}
 			
 			if (!player.hasPermission("compassnav.perks.free")) {
@@ -186,6 +189,34 @@ public class EventListener implements Listener {
     	}
     }
     
+    public void checkPlayers(Player player, int slot) {
+    	if (timers.containsKey(player.getName())) {
+    		timers.get(player.getName()).cancel();
+    	}
+    	if (plugin.getConfig().getBoolean("WarmupTime") && !player.hasPermission("compassnav.perks.cooldownprevent")) {
+    		boolean delay = false;
+    		
+	    	for (Player p : plugin.getServer().getOnlinePlayers()) {
+	    		if (p.getName() != player.getName()) {
+		    		if (p.getLocation().distance(player.getLocation()) < plugin.getConfig().getInt("WarmupDistance")) {
+		    			delay = true;
+		    			break;
+		    		}
+	    		}
+	    	}
+	    	
+	    	if (delay) {
+	    		timers.put(player.getName(), new WarmupTimer(plugin, this, player, slot));
+	    		timers.get(player.getName()).runTaskLater(plugin, 20L * plugin.getConfig().getInt("WarmupDelay"));
+	    		plugin.send(player, "§6Teleporting you in " + plugin.getConfig().getInt("WarmupDelay") + " seconds, please do not move!");
+	    	} else {
+	    		checkMoney(player, slot);
+	    	}
+    	} else {
+    		checkMoney(player, slot);
+    	}
+    }
+    
     public void checkWarp(Player player, int slot) {
     	if (sectionExists(slot, ".Warp")) {
     		if (plugin.essentialsHandler != null) {
@@ -270,7 +301,7 @@ public class EventListener implements Listener {
 								if (plugin.getConfig().getBoolean("Sounds")) {
 									player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 								}
-								checkMoney(player, slot);
+								checkPlayers(player, slot);
 							} else if (plugin.getConfig().getBoolean("Sounds")) {
 								player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 							}
@@ -344,6 +375,18 @@ public class EventListener implements Listener {
 				plugin.send(player, "§4You do not have access to that command.");
 			}
 			event.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		if (timers.containsKey(player.getName())) {
+			if (event.getTo().getX() != event.getFrom().getX() || event.getTo().getY() != event.getFrom().getY() || event.getTo().getZ() != event.getFrom().getZ()) {
+				timers.get(player.getName()).cancel();
+				timers.remove(player.getName());
+				plugin.send(player, "§6Teleportation cancelled.");
+			}
 		}
 	}
 	

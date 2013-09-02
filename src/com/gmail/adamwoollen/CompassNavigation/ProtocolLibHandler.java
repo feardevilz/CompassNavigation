@@ -44,7 +44,7 @@ public class ProtocolLibHandler {
     public void addGlow(ItemStack[] stacks) {
         for (ItemStack stack : stacks) {
             if (stack != null) {
-                if (stack.getEnchantmentLevel(Enchantment.WATER_WORKER) == 1337) {
+                if (stack.getEnchantmentLevel(Enchantment.WATER_WORKER) == 4) {
                     NbtCompound compound = (NbtCompound) NbtFactory.fromItemTag(stack);
                     compound.put(NbtFactory.ofList("ench"));
                 }
