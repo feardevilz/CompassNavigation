@@ -4,10 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -20,16 +18,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
+@SuppressWarnings("all")
 public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
-    public Inventory chest;
-    public List<String> lore = new CopyOnWriteArrayList<String>();
     public String title = "CompassNavigation";
     public VaultHandler vault;
     
@@ -58,9 +59,9 @@ public class EventListener implements Listener {
     	return (short) 0;
     }
 	
-    public void handleSlot(Player player, int slot, Inventory chest) {
+    public Inventory handleSlot(Player player, int slot, Inventory chest) {
     	if (plugin.getConfig().getBoolean(slot + ".Enabled", false)) {
-    		lore.clear();
+    		ArrayList<String> lore = new ArrayList<String>();
     		String Name = null;
     		
     		if (sectionExists(slot, ".Name")) {
@@ -78,7 +79,7 @@ public class EventListener implements Listener {
 		
 			ItemStack stack = new ItemStack(ID, Amount, Damage);
 			
-			if ((plugin.getConfig().getBoolean(slot + ".Enchanted", false)) && (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib"))) {
+			if (plugin.getConfig().getBoolean(slot + ".Enchanted", false) && plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
 				stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1337);
 			}
 			
@@ -92,12 +93,13 @@ public class EventListener implements Listener {
 				}
 			}
 			
-			if (!(player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.hasPermission("compassnav.*")))) {
+			if (!player.hasPermission("compassnav.use") || player.hasPermission(new Permission("compassnav.deny.slot." + slot, PermissionDefault.FALSE))) {
 				lore.add("§4No permission");
 			}
 			
 			chest.setItem(slot - 1, setName(stack, Name, lore));
     	}
+    	return chest;
     }
     
     public String handleModifiers(String string, Player player) {
@@ -143,13 +145,14 @@ public class EventListener implements Listener {
     public void checkBungee(Player player, int slot) {
     	if (sectionExists(slot, ".Command")) {
     		if (plugin.getConfig().getString(slot + ".Command").startsWith("c:")) {
-    			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), handleModifiers(plugin.getConfig().getString(slot + ".Command").substring(2), player));
+    			plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), handleModifiers(plugin.getConfig().getString(slot + ".Command").substring(2), player));
     		} else {
-    			Bukkit.dispatchCommand(player, handleModifiers(plugin.getConfig().getString(slot + ".Command"), player));
+    			plugin.getServer().dispatchCommand(player, handleModifiers(plugin.getConfig().getString(slot + ".Command"), player));
     		}
     	}
 		if (sectionExists(slot, ".Bungee")) {
 			try {
+				plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
 				ByteArrayOutputStream b = new ByteArrayOutputStream();
 				DataOutputStream out = new DataOutputStream(b);
 				out.writeUTF("Connect");
@@ -167,28 +170,27 @@ public class EventListener implements Listener {
     public void checkLilypad(Player player, int slot) {
     	if (sectionExists(slot, ".Lilypad")) {
     		try {
-	    		Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
-	    		Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
-	    		Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
-	    		Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
-	    		Method connection = connectClass.getDeclaredMethod("request", requestClass);
-	    		
-	    		Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
-	    		connection.invoke(connect, request);
-    		} catch (Exception e) {
-    			checkWarp(player, slot);
-    		}
+    	    	Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
+    	    	Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
+    	    	Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
+    	    	Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
+    	    	Method connection = connectClass.getDeclaredMethod("request", requestClass);
+    	    	
+    	    	Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
+    	    	connection.invoke(connect, request);
+        	} catch (Exception e) {
+        		checkWarp(player, slot);
+        	}
     	} else {
     		checkWarp(player, slot);
     	}
     }
-
     
     public void checkWarp(Player player, int slot) {
     	if (sectionExists(slot, ".Warp")) {
-    		if (plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
-    			Bukkit.dispatchCommand(player, "warp " + plugin.getConfig().getString(slot + ".Warp"));
-    			player.closeInventory();
+    		Location loc = plugin.essentialsHandler.getWarp(player, plugin.getConfig().getString(slot + ".Warp"));
+    		if (loc != null) {
+    			player.teleport(loc);
     		} else {
     			checkCoords(player, slot);
     		}
@@ -199,14 +201,7 @@ public class EventListener implements Listener {
     
     public void checkCoords(Player player, int slot) {
     	if (sectionExists(slot, ".X")) {
-    		Location location = player.getLocation();
-    		location.setWorld(Bukkit.getServer().getWorld(plugin.getConfig().getString(slot + ".World")));
-    		location.setX(plugin.getConfig().getDouble(slot + ".X"));
-    		location.setY(plugin.getConfig().getDouble(slot + ".Y"));
-    		location.setZ(plugin.getConfig().getDouble(slot + ".Z"));
-    		location.setYaw(plugin.getConfig().getInt(slot + ".Yaw"));
-    		location.setPitch(plugin.getConfig().getInt(slot + ".Pitch"));
-			player.teleport(location);
+    		player.teleport(new Location(plugin.getServer().getWorld(plugin.getConfig().getString(slot + ".World")), plugin.getConfig().getDouble(slot + ".X"), plugin.getConfig().getDouble(slot + ".Y"), plugin.getConfig().getDouble(slot + ".Z"), plugin.getConfig().getInt(slot + ".Yaw"), plugin.getConfig().getInt(slot + ".Pitch")));
     	}
     	player.closeInventory();
     }
@@ -217,40 +212,10 @@ public class EventListener implements Listener {
     	}
     	
     	title = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"));
-		Inventory chest = Bukkit.createInventory(null, (plugin.getConfig().getInt("Rows") * 9), title);
+		Inventory chest = plugin.getServer().createInventory(null, (plugin.getConfig().getInt("Rows") * 9), title);
 		
-		for (int slot = 0; slot < 9; slot++) {
-			handleSlot(player, slot, chest);
-		}
-	
-		if (plugin.getConfig().getInt("Rows") >= 2) {	
-			for (int slot = 9; slot < 18; slot++) {
-				handleSlot(player, slot, chest);
-			}
-		}
-		
-		if (plugin.getConfig().getInt("Rows") >= 3) {	
-			for (int slot = 18; slot < 27; slot++) {
-				handleSlot(player, slot, chest);
-			}
-		}
-	
-		if (plugin.getConfig().getInt("Rows") >= 4) {	
-			for (int slot = 27; slot < 36; slot++) {
-				handleSlot(player, slot, chest);
-			}
-		}
-		
-		if (plugin.getConfig().getInt("Rows") >= 5) {	
-			for (int slot = 36; slot < 45; slot++) {
-				handleSlot(player, slot, chest);
-			}
-		}
-		
-		if (plugin.getConfig().getInt("Rows") >= 6) {	
-			for (int slot = 45; slot < 54; slot++) {
-				handleSlot(player, slot, chest);
-			}
+		for (int slot = 0; slot < chest.getSize(); slot++) {
+			chest = handleSlot(player, slot, chest);
 		}
 		
 		player.openInventory(chest);
@@ -260,11 +225,11 @@ public class EventListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 		    Player player = event.getPlayer();
-		    if ((player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData() == getDamage(plugin.getConfig().getString("Item"))))) {
+		    if (player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData()) == getDamage(plugin.getConfig().getString("Item"))) {
 		    	if (player.hasPermission("compassnav.use")) {
-					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
+					if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && !player.hasPermission("compassnav.perks.use.world")) {
 		    			plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
-		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
+		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
 		    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
 		    			openInventory(player);
@@ -276,24 +241,35 @@ public class EventListener implements Listener {
 	}
 	
 	@EventHandler
+	public void onInventoryClose(InventoryCloseEvent event) {
+		if (event.getPlayer() instanceof Player) {
+			final Player player = (Player) event.getPlayer();
+			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+				public void run() {
+					player.updateInventory();
+				}
+			}, 5L);
+		}
+	}
+	
+	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent event) {
-		Player player = (Player) event.getWhoClicked();
-		if (event.getInventory().getTitle().equals(title)) {
-			for (int slot = 0; slot < 54; slot++) {
-				if (event.getRawSlot() == slot - 1) {
+		if (event.getWhoClicked() instanceof Player) {
+			Player player = (Player) event.getWhoClicked();
+			 if (player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData()) == getDamage(plugin.getConfig().getString("Item"))) {
+				if (event.getInventory().getTitle().equals(title)) {
+					event.setCancelled(true);
+					int slot = event.getRawSlot() + 1;
 					if (sectionExists(slot, ".Enabled")) {
 						if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
-							if ((player.hasPermission("compassnav.use")) && ((!player.hasPermission("compassnav.deny.slot." + slot) || player.isOp() || player.hasPermission("compassnav.admin")))) {
+							if (player.hasPermission("compassnav.use") && !player.hasPermission(new Permission("compassnav.deny.slot." + slot, PermissionDefault.FALSE))) {
 								if (plugin.getConfig().getBoolean("Sounds")) {
 									player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 								}
 								checkMoney(player, slot);
-							} else {
-								if (plugin.getConfig().getBoolean("Sounds")) {
-									player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
-								}
+							} else if (plugin.getConfig().getBoolean("Sounds")) {
+								player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 							}
-							event.setCancelled(true);
 						}
 					}
 				}
@@ -303,34 +279,39 @@ public class EventListener implements Listener {
 	
 	@EventHandler
 	public void onSignInteract(PlayerInteractEvent event) {
-		try {
+		if (event.hasBlock()) {
 			Block block = event.getClickedBlock();
 			if (event.getPlayer().hasPermission("compassnav.sign.use")) {
 				if (block.getTypeId() == 63 || block.getTypeId() == 68) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-						Sign sign = (Sign) block.getState();
-				        if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
-				        	Player player = (Player) event.getPlayer();
-							if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-				    			plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
-				    		} else if (!plugin.canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-				    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
-				    		} else {
-				    			openInventory(player);
-				    		}
-							event.setCancelled(true);
-				        }
+						if (block.getState() instanceof Sign) {
+							Sign sign = (Sign) block.getState();
+							String line = sign.getLine(0);
+							if (line != "" && line != null) {
+						        if (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
+						        	Player player = (Player) event.getPlayer();
+									if (plugin.getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && !player.hasPermission("compassnav.perks.use.world")) {
+						    			plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
+						    		} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
+						    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
+						    		} else {
+						    			openInventory(player);
+						    		}
+									event.setCancelled(true);
+						        }
+							}
+						}
 					}
 				}
 			}
-		} catch (Exception e) {}
+		} 
 	}
 	  
 	@EventHandler
 	public void onSignCreate(SignChangeEvent event) {
-		try {
-			String line = event.getLine(0);
-			if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || (line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName"))))) {
+		String line = event.getLine(0);
+		if (line != "" && line != null) {
+			if (line.equals(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) || line.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")))) {
 				if (event.getPlayer().hasPermission("compassnav.admin.sign.create")) {
 					event.setLine(0, ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("SignName")));
 					plugin.send(event.getPlayer(), plugin.prefix + "§6Succesfully created a Teleport sign!");
@@ -339,19 +320,39 @@ public class EventListener implements Listener {
 					plugin.send(event.getPlayer(), plugin.prefix + "§6You do not have permission to create a Teleport sign.");
 				}
 			}
-		} catch (Exception e) {}
+		}
 	}
 	
-	public ItemStack setName(ItemStack items, String name, List<String> lore) {
-		ItemMeta itemMeta = items.getItemMeta();
+	@EventHandler
+	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+		String cmd = event.getMessage().substring(1);
+		if (cmd.equalsIgnoreCase(plugin.getConfig().getString("CommandName"))) {
+			Player player = event.getPlayer();
+			if (player.hasPermission("compassnav.use")) {
+				if (plugin.getConfig().getStringList("DisabledWorlds").contains(player.getWorld().getName()) && !player.hasPermission("compassnav.perks.use.world")) {
+					plugin.send(player, plugin.prefix + "§6You can't teleport from this world!");
+				} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
+					plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
+				} else {
+					openInventory(player);
+				}
+			} else {
+				plugin.send(player, "§4You do not have access to that command.");
+			}
+			event.setCancelled(true);
+		}
+	}
+	
+	public ItemStack setName(ItemStack item, String name, ArrayList<String> lore) {
+		ItemMeta itemMeta = item.getItemMeta();
 		if (name != null) {
 			itemMeta.setDisplayName(name);
 		}
 		if (lore != null) {
 			itemMeta.setLore(lore);
 		}
-		items.setItemMeta(itemMeta);
-		return items;
+		item.setItemMeta(itemMeta);
+		return item;
 	}
 	
 }

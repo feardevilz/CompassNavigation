@@ -17,24 +17,20 @@ public class ProtocolLibHandler {
 	public CompassNavigation plugin;
 	
 	public ProtocolLibHandler(CompassNavigation plugin) {
-		this.plugin = plugin;
+		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(
+	    	plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.NORMAL, 
+	    	Packets.Server.SET_SLOT, Packets.Server.WINDOW_ITEMS) {
+			public void onPacketSending(PacketEvent event) {
+				if (event.getPacketID() == Packets.Server.SET_SLOT) {
+					removeAttributes(new ItemStack[] { event.getPacket().getItemModifier().read(0) });
+					addGlow(new ItemStack[] { event.getPacket().getItemModifier().read(0) });
+				} else {
+					removeAttributes(event.getPacket().getItemArrayModifier().read(0));
+					addGlow(event.getPacket().getItemArrayModifier().read(0));
+	            }
+	        }
+		});
 	}
-	
-	public void initializeListener() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(
-                plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.NORMAL, 
-                Packets.Server.SET_SLOT, Packets.Server.WINDOW_ITEMS) {
-            public void onPacketSending(PacketEvent event) {
-                if (event.getPacketID() == Packets.Server.SET_SLOT) {
-                	removeAttributes(new ItemStack[] { event.getPacket().getItemModifier().read(0) });
-                    addGlow(new ItemStack[] { event.getPacket().getItemModifier().read(0) });
-                } else {
-                	removeAttributes(event.getPacket().getItemArrayModifier().read(0));
-                    addGlow(event.getPacket().getItemArrayModifier().read(0));
-                }
-            }
-        });
-    }
 	
 	public void removeAttributes(ItemStack[] stacks) {
 		for (ItemStack stack : stacks) {

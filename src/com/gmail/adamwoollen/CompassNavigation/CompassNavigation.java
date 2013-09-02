@@ -1,5 +1,7 @@
 package com.gmail.adamwoollen.CompassNavigation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -10,13 +12,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
 public class CompassNavigation extends JavaPlugin {
 	
 	public String prefix = "";
-	public WorldGuardHandler worldGuardHandler = null;
-	public ProtocolLibHandler protocolLibHandler = null;
-	public EventListener eventListener = null;
-	public AutoUpdater autoUpdater = null;
+	public WorldGuardHandler worldGuardHandler;
+	public ProtocolLibHandler protocolLibHandler; 
+	public EventListener eventListener;
+	public AutoUpdater autoUpdater;
+	public EssentialsHandler essentialsHandler;
 	public String slot = "0";
 	
 	public void onEnable() {
@@ -29,15 +34,18 @@ public class CompassNavigation extends JavaPlugin {
         
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
         	protocolLibHandler = new ProtocolLibHandler(this);
-        	protocolLibHandler.initializeListener();
+        }
+        
+        if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
+        	essentialsHandler = new EssentialsHandler(this);
         }
         
         if (getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
-        	worldGuardHandler = new WorldGuardHandler(this);
+        	worldGuardHandler = new WorldGuardHandler((WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard"));
         }
         
         try {
-        	if ((getConfig().getBoolean("AutoUpdater")) && (!getDescription().getVersion().contains("SNAPSHOT"))) {
+        	if (getConfig().getBoolean("AutoUpdater") && !getDescription().getVersion().contains("SNAPSHOT")) {
         		autoUpdater = new AutoUpdater(this);
         	}
 		} catch (Exception e) {}
@@ -46,7 +54,7 @@ public class CompassNavigation extends JavaPlugin {
 
 		getServer().getPluginManager().registerEvents(eventListener, this);
 		
-		if ((getConfig().getString("Prefix") != "") && (getConfig().getString("Prefix") != null)) { 
+		if (getConfig().getString("Prefix") != null && getConfig().getString("Prefix") != "") { 
 			prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("Prefix") + " ");
 		}
 	}
@@ -55,9 +63,7 @@ public class CompassNavigation extends JavaPlugin {
 		for (int number = 0; number < 54; number++) {
 			if (getConfig().contains(number + ".Desc")) {
 				if (getConfig().isString(number + ".Desc")) {
-					List<String> newLore = new CopyOnWriteArrayList<String>();
-					newLore.add(getConfig().getString(number + ".Desc"));
-					getConfig().set(number + ".Lore", newLore);
+					getConfig().set(number + ".Lore", new ArrayList<String>(Arrays.asList(getConfig().getString(number + ".Desc"))));
 					getConfig().set(number + ".Desc", null);
 				}
 			}
@@ -67,8 +73,7 @@ public class CompassNavigation extends JavaPlugin {
 	public void migrateFromDesc() {
 		for (int number = 0; number < 54; number++) {
 			if (getConfig().contains(number + ".Desc")) {
-				List<String> newLore = getConfig().getStringList(number + ".Desc");
-				getConfig().set(number + ".Lore", newLore);
+				getConfig().set(number + ".Lore", getConfig().getStringList(number + ".Desc"));
 				getConfig().set(number + ".Desc", null);
 			}
 		}
@@ -129,7 +134,7 @@ public class CompassNavigation extends JavaPlugin {
 		return (worldGuardHandler == null) ? true : worldGuardHandler.canUseCompassHere(location);
 	}
 	
-    public boolean sectionExists(String slot, String path) {
+	public boolean sectionExists(String slot, String path) {
     	if (getConfig().contains(slot + path)) {
     		return true;
     	}
@@ -146,7 +151,7 @@ public class CompassNavigation extends JavaPlugin {
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-    	if ((cmd.getName().equalsIgnoreCase("compassnav")) || (cmd.getName().equalsIgnoreCase("cn")) || (cmd.getName().equalsIgnoreCase("compassnavigation"))) {
+    	if (cmd.getName().equalsIgnoreCase("compassnav") || cmd.getName().equalsIgnoreCase("cn") || cmd.getName().equalsIgnoreCase("compassnavigation")) {
     		if (args.length == 0) {
     			sendHelpMessage(sender);
     		} else if (args.length == 1) {
@@ -213,7 +218,7 @@ public class CompassNavigation extends JavaPlugin {
 									send(player, prefix + "§6Item set for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("enable")) {
 									if (getConfig().contains(slot + ".Enabled")) {
-										if (getConfig().getBoolean(slot + ".Enabled") == true) {
+										if (getConfig().getBoolean(slot + ".Enabled")) {
 											send(player, prefix + "§6Disabled slot " + slot + ".");
 											getConfig().set(slot + ".Enabled", false);
 										} else {
@@ -244,7 +249,7 @@ public class CompassNavigation extends JavaPlugin {
 									send(player, prefix + "§6Amount unset for slot " + slot + "!");
 								} else if (args[1].equalsIgnoreCase("enchant")) {
 									if (getConfig().contains(slot + ".Enchant")) {
-										if (getConfig().getBoolean(slot + ".Enchant") == true) {
+										if (getConfig().getBoolean(slot + ".Enchant")) {
 											send(player, prefix + "§6Removed enchant from slot " + slot + ".");
 											getConfig().set(slot + ".Enchant", null);
 										} else {
@@ -347,23 +352,6 @@ public class CompassNavigation extends JavaPlugin {
 					send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
 				}
 			}
-    	} else if (cmd.getName().equalsIgnoreCase(getConfig().getString("CommandName"))) {
-    		if (sender instanceof Player) {
-				Player player = (Player) sender;
-    			if (player.hasPermission("compassnav.use")) {
-    				if (getConfig().getList("DisabledWorlds").contains(player.getWorld().getName()) && (!player.hasPermission("compassnav.perks.use.world"))) {
-    					send(player, prefix + "§6You can't teleport from this world!");
-    				} else if (!canUseCompassHere(player.getLocation()) && (!player.hasPermission("compassnav.perks.use.region"))) {
-    					send(player, prefix + "§6You can't teleport in this region!");
-    				} else {
-    					eventListener.openInventory(player);
-    				}
-    			} else {
-    				send(player, "§4You do not have access to that command.");
-    			}
-    		} else {
-    			send(getServer().getConsoleSender(), prefix + "Sorry, but consoles can't execute this command.");
-    		}
     	} else {
     		sendHelpMessage(sender);
     	}

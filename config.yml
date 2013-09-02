@@ -32,6 +32,3 @@ Sounds: true
 DisabledWorlds:
   - example1
   - example2
-MustHaveCompassWorlds:
-  - example3
-  - example4
