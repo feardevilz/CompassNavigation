@@ -20,6 +20,7 @@ public class CompassNavigation extends JavaPlugin {
 	public WorldGuardHandler worldGuardHandler;
 	public ProtocolLibHandler protocolLibHandler; 
 	public EventListener eventListener;
+	public VaultHandler vaultHandler;
 	public AutoUpdater autoUpdater;
 	public EssentialsHandler essentialsHandler;
 	public String slot = "0";
@@ -44,11 +45,13 @@ public class CompassNavigation extends JavaPlugin {
         	worldGuardHandler = new WorldGuardHandler((WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard"));
         }
         
-        try {
-        	if (getConfig().getBoolean("AutoUpdater") && !getDescription().getVersion().contains("SNAPSHOT")) {
-        		autoUpdater = new AutoUpdater(this);
-        	}
-		} catch (Exception e) {}
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+        	vaultHandler = new VaultHandler(this);
+        }
+        
+        if (getConfig().getBoolean("AutoUpdater", true)) {
+        	autoUpdater = new AutoUpdater(this, getFile(), AutoUpdater.UpdateType.DEFAULT, true);
+        }
         
         eventListener = new EventListener(this);
 
@@ -92,8 +95,8 @@ public class CompassNavigation extends JavaPlugin {
 		send(sender, "§6Oo-----------------------oOo-----------------------oO");
 		send(sender, "§2/compassnav help§a - Get command help");
 		send(sender, "§2/compassnav reload§a - Reload the plugin");
-		send(sender, "§2/compassnav update§a - Check for updates");
-		send(sender, "§2/compassnav setup§a - Set up compass inventory slots");
+		send(sender, "§2/compassnav update§a - Download the latest update");
+		send(sender, "§2/compassnav setup§a - Set up the compass inventory");
 		send(sender, "§6Oo-----------------------oOo-----------------------oO");
 	}
 		
@@ -165,13 +168,23 @@ public class CompassNavigation extends JavaPlugin {
     			} else if (args[0].equalsIgnoreCase("update")) {
     				if (sender.hasPermission("compassnav.admin.update")) {
 	    				if (autoUpdater != null) {
-		    				if (autoUpdater.updatesAvailable()) {
-		    					send(sender, prefix + "§6There is a new update for CompassNavigation! Update version: §ev" + autoUpdater.newVersion + "§6, current version: §ev" + autoUpdater.currentVersion);
+		    				if (autoUpdater.downloadThread != null && autoUpdater.downloadThread.isAlive()) {
+		    					send(sender, prefix + "§6There is already a download in progress!");
 		    				} else {
-		    					send(sender, prefix + "§6No updates found for CompassNavigation.");
-		    				}
+		    					send(sender, prefix + "§6Downloading latest version...");
+		    					autoUpdater.downloadLatestVersion();
+		    					if (autoUpdater.result == AutoUpdater.UpdateResult.FAIL_DBO) {
+		    						send(sender, prefix + "§6Couldn't contact DevBukkit. Is your server connected to the internet?");
+		    					} else if (autoUpdater.result == AutoUpdater.UpdateResult.FAIL_DOWNLOAD) {
+		    						send(sender, prefix + "§6Couldn't download the file. Please try again.");
+		    					} else if (autoUpdater.result == AutoUpdater.UpdateResult.SUCCESS) {
+		    						send(sender, prefix + "§6Successfully downloaded the latest version! Please restart your server for the changes to take effect.");
+		    					} else {
+		    						send(sender, prefix + "§6I'm not sure what happened. Please check the console.");
+		    					}
+	    					}
 	    				} else {
-	    					send(sender, prefix + "§6Couldn't search for updates because the autoupdater is disabled.");
+	    					send(sender, prefix + "§6Couldn't download the latest update because the auto-updater is disabled.");
 	    				}
     				} else {
     					send(sender, "§4You do not have access to that command.");

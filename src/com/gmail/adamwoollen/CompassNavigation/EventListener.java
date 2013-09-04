@@ -23,6 +23,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,12 +35,11 @@ public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
     public String title = "CompassNavigation";
-    public VaultHandler vault;
+    public ArrayList<String> using = new ArrayList<String>();
     public HashMap<String, WarmupTimer> timers = new HashMap<String, WarmupTimer>();
     
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
-    	this.vault = new VaultHandler(plugin);
     }
     
     public boolean sectionExists(int slot, String path) {
@@ -96,7 +96,7 @@ public class EventListener implements Listener {
 				}
 			}
 			
-			if (!player.hasPermission("compassnav.use") || player.hasPermission(new Permission("compassnav.deny.slot." + slot, PermissionDefault.FALSE))) {
+			if (!player.hasPermission("compassnav.use") || !player.hasPermission(new Permission("compassnav.use.slot." + slot, PermissionDefault.TRUE))) {
 				lore.add("§4No permission");
 			}
 			
@@ -120,11 +120,11 @@ public class EventListener implements Listener {
 		if (sectionExists(slot, ".Price")) {
 			Double price = plugin.getConfig().getDouble(slot + ".Price");
 			String name = player.getName();
-			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
+			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault") && plugin.vaultHandler != null) {
 				if (!player.hasPermission("compassnav.perks.free")) {
 					if (!player.hasPermission("compassnav.perks.free." + slot)) {
-						if (vault.hasEnough(name, price)) {
-							vault.subtract(name, price);
+						if (plugin.vaultHandler.hasEnough(name, price)) {
+							plugin.vaultHandler.subtract(name, price);
 							plugin.send(player, plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
 							checkBungee(player, slot);
 						} else {
@@ -246,10 +246,14 @@ public class EventListener implements Listener {
     		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
     	}
     	
+    	if (!using.contains(player.getName())) {
+    		using.add(player.getName());
+    	}
+    	
     	title = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("GUIName"));
 		Inventory chest = plugin.getServer().createInventory(null, (plugin.getConfig().getInt("Rows") * 9), title);
 		
-		for (int slot = 0; slot < chest.getSize(); slot++) {
+		for (int slot = 0; slot < (chest.getSize() + 1); slot++) {
 			chest = handleSlot(player, slot, chest);
 		}
 		
@@ -279,6 +283,7 @@ public class EventListener implements Listener {
 	public void onInventoryClose(InventoryCloseEvent event) {
 		if (event.getPlayer() instanceof Player) {
 			final Player player = (Player) event.getPlayer();
+			using.remove(player.getName());
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 				public void run() {
 					player.updateInventory();
@@ -291,13 +296,13 @@ public class EventListener implements Listener {
 	public void onInventoryInteract(InventoryClickEvent event) {
 		if (event.getWhoClicked() instanceof Player) {
 			Player player = (Player) event.getWhoClicked();
-			 if (player.getItemInHand().getTypeId() == getID(plugin.getConfig().getString("Item")) && ((short) player.getItemInHand().getData().getData()) == getDamage(plugin.getConfig().getString("Item"))) {
+			 if (using.contains(player.getName())) {
 				if (event.getInventory().getTitle().equals(title)) {
 					event.setCancelled(true);
 					int slot = event.getRawSlot() + 1;
 					if (sectionExists(slot, ".Enabled")) {
 						if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
-							if (player.hasPermission("compassnav.use") && !player.hasPermission(new Permission("compassnav.deny.slot." + slot, PermissionDefault.FALSE))) {
+							if (player.hasPermission("compassnav.use") && player.hasPermission(new Permission("compassnav.use.slot." + slot, PermissionDefault.TRUE))) {
 								if (plugin.getConfig().getBoolean("Sounds")) {
 									player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 								}
@@ -388,6 +393,16 @@ public class EventListener implements Listener {
 				plugin.send(player, "§6Teleportation cancelled.");
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Player player = event.getPlayer();
+		if (timers.containsKey(player.getName())) {
+			timers.get(player.getName()).cancel();
+			timers.remove(player.getName());
+		}
+		using.remove(player.getName());
 	}
 	
 	public ItemStack setName(ItemStack item, String name, ArrayList<String> lore) {
