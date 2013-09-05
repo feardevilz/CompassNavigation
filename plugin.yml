@@ -1,10 +1,10 @@
 name: CompassNavigation
-version: 1.7.1
+version: 1.7.2
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
 website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation
 authors: [DenialMC, Adzwooly]
-softdepend: [Essentials, WorldEdit, WorldGuard, Vault, ProtocolLib, Lilypad-Connect]
+softdepend: [Essentials, WorldEdit, WorldGuard, Vault, ProtocolLib, LilyPad-Connect]
 commands:
   compassnav:
     description: Allows you to reload configuration and set up CompassNavigation ingame.

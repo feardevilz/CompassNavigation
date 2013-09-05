@@ -2,8 +2,6 @@ package com.gmail.adamwoollen.CompassNavigation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -50,8 +48,7 @@ public class EventListener implements Listener {
     }
     
     public int getID(String id) {
-    	String[] split = id.split(":");
-    	return Integer.parseInt(split[0]);
+    	return Integer.parseInt(id.split(":")[0]);
     }
     
     public short getDamage(String id) {
@@ -172,18 +169,14 @@ public class EventListener implements Listener {
     
     public void checkLilypad(Player player, int slot) {
     	if (sectionExists(slot, ".Lilypad")) {
-    		try {
-    	    	Class<?> connectClass = Class.forName("lilypad.client.connect.api.Connect");
-    	    	Class<?> requestClass = Class.forName("lilypad.client.connect.api.request.impl.RedirectRequest");
-    	    	Constructor<?> constructor = requestClass.getConstructor(new Class[] { String.class, String.class });
-    	    	Object request = constructor.newInstance(new Object[] { plugin.getConfig().getString(slot + ".Lilypad"), player.getName() });
-    	    	Method connection = connectClass.getDeclaredMethod("request", requestClass);
-    	    	
-    	    	Object connect = (Object) plugin.getServer().getServicesManager().getRegistration(connectClass).getProvider();
-    	    	connection.invoke(connect, request);
-        	} catch (Exception e) {
-        		checkWarp(player, slot);
-        	}
+    		if (plugin.lilypadHandler != null) {
+    			if (!plugin.lilypadHandler.connect(player, plugin.getConfig().getString(slot + ".Lilypad"))) {
+    				checkWarp(player, slot);
+    				player.sendMessage("This server is currently §4offline§f. Try again later!");
+    			}
+    		} else {
+    			checkWarp(player, slot);
+    		}
     	} else {
     		checkWarp(player, slot);
     	}
@@ -296,20 +289,18 @@ public class EventListener implements Listener {
 	public void onInventoryInteract(InventoryClickEvent event) {
 		if (event.getWhoClicked() instanceof Player) {
 			Player player = (Player) event.getWhoClicked();
-			 if (using.contains(player.getName())) {
-				if (event.getInventory().getTitle().equals(title)) {
-					event.setCancelled(true);
-					int slot = event.getRawSlot() + 1;
-					if (sectionExists(slot, ".Enabled")) {
-						if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
-							if (player.hasPermission("compassnav.use") && player.hasPermission(new Permission("compassnav.use.slot." + slot, PermissionDefault.TRUE))) {
-								if (plugin.getConfig().getBoolean("Sounds")) {
-									player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
-								}
-								checkPlayers(player, slot);
-							} else if (plugin.getConfig().getBoolean("Sounds")) {
-								player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
+			if (event.getInventory().getTitle().equals(title)) {
+				event.setCancelled(true);
+				int slot = event.getRawSlot() + 1;
+				if (sectionExists(slot, ".Enabled")) {
+					if (plugin.getConfig().getBoolean(slot + ".Enabled")) {
+						if (player.hasPermission("compassnav.use") && player.hasPermission(new Permission("compassnav.use.slot." + slot, PermissionDefault.TRUE))) {
+							if (plugin.getConfig().getBoolean("Sounds")) {
+								player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 							}
+							checkPlayers(player, slot);
+						} else if (plugin.getConfig().getBoolean("Sounds")) {
+							player.playSound(player.getLocation(), Sound.ZOMBIE_IDLE, 1.0F, 1.0F);
 						}
 					}
 				}

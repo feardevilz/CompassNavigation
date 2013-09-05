@@ -23,6 +23,7 @@ public class CompassNavigation extends JavaPlugin {
 	public VaultHandler vaultHandler;
 	public AutoUpdater autoUpdater;
 	public EssentialsHandler essentialsHandler;
+	public LilypadHandler lilypadHandler;
 	public String slot = "0";
 	
 	public void onEnable() {
@@ -47,6 +48,10 @@ public class CompassNavigation extends JavaPlugin {
         
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {
         	vaultHandler = new VaultHandler(this);
+        }
+        
+        if (getServer().getPluginManager().isPluginEnabled("LilyPad-Connect")) {
+        	lilypadHandler = new LilypadHandler(this);
         }
         
         if (getConfig().getBoolean("AutoUpdater", true)) {
@@ -168,7 +173,7 @@ public class CompassNavigation extends JavaPlugin {
     			} else if (args[0].equalsIgnoreCase("update")) {
     				if (sender.hasPermission("compassnav.admin.update")) {
 	    				if (autoUpdater != null) {
-		    				if (autoUpdater.downloadThread != null && autoUpdater.downloadThread.isAlive()) {
+		    				if (autoUpdater.thread != null && autoUpdater.thread.isAlive()) {
 		    					send(sender, prefix + "§6There is already a download in progress!");
 		    				} else {
 		    					send(sender, prefix + "§6Downloading latest version...");
