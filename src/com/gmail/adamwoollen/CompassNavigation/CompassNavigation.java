@@ -54,7 +54,7 @@ public class CompassNavigation extends JavaPlugin {
         	lilypadHandler = new LilypadHandler(this);
         }
         
-        if (getConfig().getBoolean("AutoUpdater", true)) {
+        if (getConfig().getBoolean("AutoUpdater", true) && !getDescription().getVersion().contains("SNAPSHOT")) {
         	autoUpdater = new AutoUpdater(this, getFile(), AutoUpdater.UpdateType.DEFAULT, true);
         }
         

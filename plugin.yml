@@ -1,5 +1,5 @@
 name: CompassNavigation
-version: 1.7.2
+version: 1.8-SNAPSHOT
 description: This plugin allows you to create a usable compass that teleports you to specified locations.
 website: http://dev.bukkit.org/bukkit-plugins/compass-navigation/
 main: com.gmail.adamwoollen.CompassNavigation.CompassNavigation

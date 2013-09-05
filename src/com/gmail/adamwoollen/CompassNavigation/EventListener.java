@@ -79,13 +79,13 @@ public class EventListener implements Listener {
 		
 			ItemStack stack = new ItemStack(ID, Amount, Damage);
 			
-			if (plugin.getConfig().getBoolean(slot + ".Enchanted", false) && plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+			if (plugin.getConfig().getBoolean(slot + ".Enchanted", false) && plugin.protocolLibHandler != null) {
 				stack.addUnsafeEnchantment(Enchantment.WATER_WORKER, 4);
 			}
 			
 			if (!player.hasPermission("compassnav.perks.free")) {
 				if (!player.hasPermission("compassnav.perks.free." + slot)) {
-					if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
+					if (plugin.vaultHandler != null) {
 						if (sectionExists(slot, ".Price")) {
 							lore.add("§2Price: §a$" + plugin.getConfig().getDouble(slot + ".Price"));
 						}
@@ -113,11 +113,35 @@ public class EventListener implements Listener {
     	return string;
     }
     
+    public void checkCompassMoney(Player player) {
+    	if (plugin.vaultHandler != null) {
+	    	Double price = plugin.getConfig().getDouble("Price", 0.0);
+	    	if (price > 0) {
+	    		if (!player.hasPermission("compassnav.perks.free")) {
+	    			if (plugin.vaultHandler.hasEnough(player.getName(), price)) {
+						plugin.vaultHandler.subtract(player.getName(), price);
+						plugin.send(player, plugin.prefix + "§6Charged §a$" + Double.toString(price) + " §6from you!");
+						openInventory(player);
+					} else {
+						plugin.send(player, plugin.prefix + "§6You do not have enough money to open the compass!");
+						player.closeInventory();
+					}
+	    		} else {
+	    			openInventory(player);
+	    		}
+	    	} else {
+	    		openInventory(player);
+	    	}
+    	} else {
+    		openInventory(player);
+    	}
+    }
+    
     public void checkMoney(Player player, int slot) {
 		if (sectionExists(slot, ".Price")) {
 			Double price = plugin.getConfig().getDouble(slot + ".Price");
 			String name = player.getName();
-			if (plugin.getServer().getPluginManager().isPluginEnabled("Vault") && plugin.vaultHandler != null) {
+			if (plugin.vaultHandler != null) {
 				if (!player.hasPermission("compassnav.perks.free")) {
 					if (!player.hasPermission("compassnav.perks.free." + slot)) {
 						if (plugin.vaultHandler.hasEnough(name, price)) {
@@ -264,7 +288,7 @@ public class EventListener implements Listener {
 		    		} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
 		    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 		    		} else {
-		    			openInventory(player);
+		    			checkCompassMoney(player);
 		    			event.setCancelled(true);
 		    		}
 		    	}
@@ -326,7 +350,7 @@ public class EventListener implements Listener {
 						    		} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
 						    			plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 						    		} else {
-						    			openInventory(player);
+						    			checkCompassMoney(player);
 						    		}
 									event.setCancelled(true);
 						        }
@@ -365,7 +389,7 @@ public class EventListener implements Listener {
 				} else if (!plugin.canUseCompassHere(player.getLocation()) && !player.hasPermission("compassnav.perks.use.region")) {
 					plugin.send(player, plugin.prefix + "§6You can't teleport in this region!");
 				} else {
-					openInventory(player);
+					checkCompassMoney(player);
 				}
 			} else {
 				plugin.send(player, "§4You do not have access to that command.");
