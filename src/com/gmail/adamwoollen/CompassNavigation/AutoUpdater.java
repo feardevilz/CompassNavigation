@@ -28,7 +28,6 @@ public class AutoUpdater {
     public URL url;
     public File file;
     public Thread thread;
-    public Thread downloadThread;
     public String updateFolder = YamlConfiguration.loadConfiguration(new File("bukkit.yml")).getString("settings.update-folder");
     public AutoUpdater.UpdateResult result = AutoUpdater.UpdateResult.SUCCESS;
 
@@ -87,16 +86,6 @@ public class AutoUpdater {
                 e.printStackTrace();
             }
         }
-    }
-    
-    public void waitForDownloadThread() {
-    	if (downloadThread.isAlive()) {
-    		try {
-    			downloadThread.join();
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    		}
-    	}
     }
 
     public void saveFile(File folder, String file, String u) {
@@ -279,9 +268,9 @@ public class AutoUpdater {
     
     public void downloadLatestVersion() {
     	type = AutoUpdater.UpdateType.NO_VERSION_CHECK;
-    	downloadThread = new Thread(new UpdateRunnable());
-    	downloadThread.start();
-    	waitForDownloadThread();
+    	thread = new Thread(new UpdateRunnable());
+    	thread.start();
+    	waitForThread();
     	type = AutoUpdater.UpdateType.DEFAULT;
     }
 
