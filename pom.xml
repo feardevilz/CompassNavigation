@@ -47,8 +47,11 @@
        </repository>
        <repository>
             <id>comphenix-rep</id>
-            <name>Comphenix Repository</name>
             <url>http://repo.comphenix.net/content/groups/public</url>
+       </repository>
+       <repository>
+            <id>lilypad</id>
+            <url>http://ci.lilypadmc.org/plugin/repository/everything</url>
        </repository>
 	</repositories>
 
@@ -87,11 +90,9 @@
   		<systemPath>${project.basedir}/ProtocolLib.jar</systemPath>
   	</dependency>
     <dependency>
-	    <groupId>lilypad.bukkit</groupId>
-      <artifactId>Bukkit-Connect</artifactId>
-      <version>35</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/Bukkit-Connect.jar</systemPath>
+	    <groupId>lilypad.client.connect</groupId>
+      <artifactId>api</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.earth2me</groupId>
