@@ -60,9 +60,6 @@ public class CompassNavigation extends JavaPlugin {
         	autoUpdater = new AutoUpdater(this, getFile(), AutoUpdater.UpdateType.DEFAULT, true);
         }
         
-        //if (getConfig().getBoolean("CompassOnLogin", true)) {
-        //	compassonlogin = new CompassOnLogin(this, getFile(), CompassOnLogin.UpdateType.DEFAULT, true);
-        //}
         //getConfig().addDefault("CompassOnLogin", Boolean.valueOf(true));
         //getConfig().addDefault("HotbarSlot", Integer.valueOf(0));
 
@@ -171,13 +168,6 @@ public class CompassNavigation extends JavaPlugin {
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-    	if (cmd.getName().equalsIgnoreCase("compass")) {
-		//	if (!sender.getPlayer().getInventory().contains(compassItem, 1)) {
-		//		ItemStack compass1 = new ItemStack(compassItem);
-		//		sender.getPlayer().getInventory().setItem(getConfig().getInt("HotbarSlot"), compass1);
-		//	}
-    		return true;
-    	}
 		if (cmd.getName().equalsIgnoreCase("compassnav") || cmd.getName().equalsIgnoreCase("cn") || cmd.getName().equalsIgnoreCase("compassnavigation")) {
     		if (args.length == 0) {
     			sendHelpMessage(sender);
