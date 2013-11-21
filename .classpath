@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="Bukkit.jar"/>
+	<classpathentry kind="lib" path="Essentials.jar"/>
+	<classpathentry kind="lib" path="ProtocolLib.jar"/>
+	<classpathentry kind="lib" path="Vault.jar"/>
+	<classpathentry kind="lib" path="WorldEdit.jar"/>
+	<classpathentry kind="lib" path="WorldGuard.jar"/>
+	<classpathentry kind="lib" path="Client-Connect-API.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

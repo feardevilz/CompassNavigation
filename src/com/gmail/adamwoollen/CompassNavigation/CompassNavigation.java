@@ -96,13 +96,17 @@ public class CompassNavigation extends JavaPlugin {
 	}
 	
 	public void sendHelpMessage(CommandSender sender) {
-		send(sender, "§6§lCOMPASSNAV§f | §7/compassnav help");
-		send(sender, "§6Oo-----------------------oOo-----------------------oO");
-		send(sender, "§2/compassnav help§a - Get command help");
-		send(sender, "§2/compassnav reload§a - Reload the plugin");
-		send(sender, "§2/compassnav update§a - Download the latest update");
-		send(sender, "§2/compassnav setup§a - Set up the compass inventory");
-		send(sender, "§6Oo-----------------------oOo-----------------------oO");
+		if (sender.hasPermission("compassnav.admin")) {
+			send(sender, "§6§lCOMPASSNAV§f | §7/compassnav help");
+			send(sender, "§6Oo-----------------------oOo-----------------------oO");
+			send(sender, "§2/compassnav help§a - Get command help");
+			send(sender, "§2/compassnav reload§a - Reload the plugin");
+			send(sender, "§2/compassnav update§a - Download the latest update");
+			send(sender, "§2/compassnav setup§a - Set up the compass inventory");
+			send(sender, "§6Oo-----------------------oOo-----------------------oO");
+		} else {
+			send(sender, "§4You do not have access to that command.");
+		}
 	}
 		
 	public void sendSetupMessage(CommandSender sender, String slot) {
