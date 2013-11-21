@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -25,9 +26,10 @@ public class CompassNavigation extends JavaPlugin {
 	public EssentialsHandler essentialsHandler;
 	public LilypadHandler lilypadHandler;
 	public String slot = "0";
+	public ItemStack compassItem;
 	
 	public void onEnable() {
-		getConfig().options().copyDefaults(true);
+		//getConfig().options().copyDefaults(true);
         
         migrateToList();
         migrateFromDesc();
@@ -58,6 +60,12 @@ public class CompassNavigation extends JavaPlugin {
         	autoUpdater = new AutoUpdater(this, getFile(), AutoUpdater.UpdateType.DEFAULT, true);
         }
         
+        //if (getConfig().getBoolean("CompassOnLogin", true)) {
+        //	compassonlogin = new CompassOnLogin(this, getFile(), CompassOnLogin.UpdateType.DEFAULT, true);
+        //}
+        //getConfig().addDefault("CompassOnLogin", Boolean.valueOf(true));
+        //getConfig().addDefault("HotbarSlot", Integer.valueOf(0));
+
         eventListener = new EventListener(this);
 
 		getServer().getPluginManager().registerEvents(eventListener, this);
@@ -163,7 +171,14 @@ public class CompassNavigation extends JavaPlugin {
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-    	if (cmd.getName().equalsIgnoreCase("compassnav") || cmd.getName().equalsIgnoreCase("cn") || cmd.getName().equalsIgnoreCase("compassnavigation")) {
+    	if (cmd.getName().equalsIgnoreCase("compass")) {
+		//	if (!sender.getPlayer().getInventory().contains(compassItem, 1)) {
+		//		ItemStack compass1 = new ItemStack(compassItem);
+		//		sender.getPlayer().getInventory().setItem(getConfig().getInt("HotbarSlot"), compass1);
+		//	}
+    		return true;
+    	}
+		if (cmd.getName().equalsIgnoreCase("compassnav") || cmd.getName().equalsIgnoreCase("cn") || cmd.getName().equalsIgnoreCase("compassnavigation")) {
     		if (args.length == 0) {
     			sendHelpMessage(sender);
     		} else if (args.length == 1) {

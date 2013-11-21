@@ -3,6 +3,7 @@ package com.gmail.adamwoollen.CompassNavigation;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -21,10 +22,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.Material;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
@@ -33,11 +38,14 @@ public class EventListener implements Listener {
 	
 	public CompassNavigation plugin;
     public String title = "CompassNavigation";
+	public ItemStack compassItem;
     public ArrayList<String> using = new ArrayList<String>();
     public HashMap<String, WarmupTimer> timers = new HashMap<String, WarmupTimer>();
-    
+        
     public EventListener(CompassNavigation plugin) {
     	this.plugin = plugin;
+        compassItem = makeItem();
+
     }
     
     public boolean sectionExists(int slot, String path) {
@@ -58,7 +66,35 @@ public class EventListener implements Listener {
     	}
     	return (short) 0;
     }
-	
+
+    // from sgtcraze lilypadcompass -feardevilz
+    private Material Material(String string)
+    {
+      return null;
+    }
+    
+    // from sgtcraze lilypadcompass -feardevilz
+    public ItemStack makeItem() {
+        ItemStack item = new ItemStack(Material.COMPASS, 1);
+
+        Material mat = Material.matchMaterial(plugin.getConfig().getString("Item"));
+        if (mat != null) {
+          item.setType(mat);
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', 
+          plugin.getConfig().getString("Itemtitle")));
+        meta.setLore(Arrays.asList(new String[] { ChatColor.translateAlternateColorCodes('&', 
+          plugin.getConfig().getString("Itemlore")) }));
+        item.setItemMeta(meta);
+        return item;
+    }
+    
+    // created to give items on command -feardevilz
+    //public ItemStack giveItem() {
+    //}
+    
     public Inventory handleSlot(Player player, int slot, Inventory chest) {
     	if (plugin.getConfig().getBoolean(slot + ".Enabled", false)) {
     		ArrayList<String> lore = new ArrayList<String>();
@@ -409,7 +445,18 @@ public class EventListener implements Listener {
 			}
 		}
 	}
-	
+
+	// from fred12i12i NCD -feardevilz
+	@EventHandler
+	public void OnLogin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
+		if (player.hasPermission("compassnav.use") && plugin.getConfig().getBoolean("CompassOnLogin"))
+			if (!event.getPlayer().getInventory().contains(compassItem, 1)) {
+				ItemStack compass1 = new ItemStack(compassItem);
+				event.getPlayer().getInventory().setItem(plugin.getConfig().getInt("HotbarSlot"), compass1);
+			}
+	}
+
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
@@ -419,6 +466,14 @@ public class EventListener implements Listener {
 		}
 		using.remove(player.getName());
 	}
+	
+	// from fred12i12i NCD and sgtcraze lilypadcompass -feardevilz
+	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent event) {
+		if (event.getItemDrop().getItemStack().getType() == Material.COMPASS || event.getItemDrop().getItemStack().equals(compassItem))
+			event.setCancelled(true);
+	}
+
 	
 	public ItemStack setName(ItemStack item, String name, ArrayList<String> lore) {
 		ItemMeta itemMeta = item.getItemMeta();
